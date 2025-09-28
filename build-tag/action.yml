@@ -1,0 +1,81 @@
+name: 'Build and Tag'
+description: 'Creates versioned tags with date prefix for releases'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for creating tags and changelog'
+    required: true
+  prefix:
+    description: 'Prefix name to use in tag name'
+    required: false
+    default: 'release'
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '18'
+  create_changelog:
+    description: 'Whether to create changelog using changelogithub'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Create a release tag
+      id: create_tag
+      run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
+        # 当日日期
+        DATE=$(date +"%Y_%m_%d")
+
+        # 分支名称
+        CURRENT_BRANCH="${{ inputs.prefix }}"
+
+        # 获取最新版本号
+        LATEST_TAG=$(git tag -l "${CURRENT_BRANCH}_${DATE}_v*" | sort -V | tail -n1)
+        # 如果今天还没有版本, 从v1开始
+        if [ -z "$LATEST_TAG" ]; then
+            VERSION=1
+        else
+            # 提取现有的最大版本
+            VERSION=${LATEST_TAG#*v}
+            # 递增版本号
+            ((VERSION++))
+        fi
+
+        # 创建新的标签名
+        TAG_NAME="${CURRENT_BRANCH}_${DATE}_v${VERSION}"
+
+        git tag $TAG_NAME
+        git push origin $TAG_NAME
+        echo "Created new tag: $TAG_NAME"
+        echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+
+    - name: Create Changelog
+      if: inputs.create_changelog == 'true'
+      run: |
+        echo "📝 Creating changelog..."
+        if npx changelogithub; then
+          echo "✅ Changelog created successfully"
+        else
+          echo "⚠️ Failed to create changelog, but continuing..."
+        fi
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}

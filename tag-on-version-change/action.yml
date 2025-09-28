@@ -1,0 +1,64 @@
+name: 'Tag on Version Change'
+description: 'Creates a Git tag when package.json version changes and generates changelog'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for creating tags and changelog'
+    required: true
+  create_changelog:
+    description: 'Whether to create changelog using changelogithub'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check if version changed
+      id: version_check
+      run: |
+        VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $VERSION"
+
+        if git tag --list "v$VERSION" | grep -q "^v$VERSION$"; then
+          echo "⚠️ Tag v$VERSION already exists"
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "⚠️ Tag v$VERSION does not exist"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Create Git tag
+      if: steps.version_check.outputs.exists == 'false'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        VERSION="${{ steps.version_check.outputs.version }}"
+        TAG_NAME="v$VERSION"
+
+        echo "🏷️ Creating tag: $TAG_NAME"
+        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+
+        echo "📤 Pushing tag to origin..."
+        if git push origin "$TAG_NAME"; then
+          echo "✅ Successfully created and pushed tag $TAG_NAME"
+        else
+          echo "❌ Failed to push tag $TAG_NAME"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Create Changelog
+      if: steps.version_check.outputs.exists == 'false' && inputs.create_changelog == 'true'
+      run: npx changelogithub
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}

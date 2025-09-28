@@ -1,0 +1,116 @@
+name: 'Publish Package to GitHub Packages'
+description: 'Builds and publishes package to GitHub Packages with version checking'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for publishing to GitHub Packages'
+    required: true
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '20'
+  package-manager:
+    description: 'Package manager to use (npm, yarn, pnpm)'
+    required: false
+    default: 'yarn'
+  build-script:
+    description: 'Build script to run'
+    required: false
+    default: 'build'
+  registry:
+    description: 'Package registry URL'
+    required: false
+    default: 'npm.pkg.github.com'
+  scope:
+    description: 'Package scope (e.g., @your-org)'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.package-manager }}
+
+    - name: Install Dependencies
+      run: ${{ inputs.package-manager }} install
+      shell: bash
+
+    - name: Build Packages
+      run: |
+        echo "🔨 Building packages using ${{ inputs.package-manager }}..."
+        if ${{ inputs.package-manager }} run ${{ inputs.build-script }}; then
+          echo "✅ Build completed successfully"
+        else
+          echo "❌ Build failed"
+          exit 1
+        fi
+      shell: bash
+
+    - name: Creating .npmrc
+      run: |
+        rm -rf .npmrc
+        cat << EOF > "$HOME/.npmrc"
+          ${{ inputs.scope }}:registry=https://${{ inputs.registry }}
+          //${{ inputs.registry }}/:_authToken=$GITHUB_TOKEN
+        EOF
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+
+    - name: Publish to Github Packages
+      run: |
+        # Cleanup function to remove .npmrc
+        cleanup() {
+          rm -f "$HOME/.npmrc" 2>/dev/null || true
+        }
+
+        # Set trap to ensure cleanup runs on script exit
+        trap cleanup EXIT
+
+        # Get package version and name from package.json
+        PUBLISH_VERSION=$(node -p "require('./package.json').version" 2>/dev/null)
+        PACKAGE_NAME=$(node -p "require('./package.json').name" 2>/dev/null)
+
+        # Validate package.json exists and has required fields
+        if [ -z "$PUBLISH_VERSION" ] || [ -z "$PACKAGE_NAME" ]; then
+          echo "❌ package.json not found or missing required fields"
+          exit 1
+        fi
+
+        echo "📦 Publishing package: $PACKAGE_NAME"
+        echo "🏷️ Version: $PUBLISH_VERSION"
+        echo "🌐 Registry: https://${{ inputs.registry }}"
+
+        # Check if npm package version already exists
+        if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://${{ inputs.registry }}" --json >/dev/null 2>&1; then
+          echo "⚠️ Version $PUBLISH_VERSION already exists, skipping publish"
+          echo "📦 Package: $PACKAGE_NAME"
+          echo "🏷️ Version: $PUBLISH_VERSION"
+          echo "🌐 Registry: https://${{ inputs.registry }}"
+        else
+          echo "🚀 Publishing to registry..."
+          if npm publish --registry="https://${{ inputs.registry }}"; then
+            echo "✅ Successfully published!"
+            echo "📦 Package: $PACKAGE_NAME"
+            echo "🏷️ Version: $PUBLISH_VERSION"
+            echo "🌐 Registry: https://${{ inputs.registry }}"
+          else
+            echo "❌ Publish failed!"
+            echo "📦 Package: $PACKAGE_NAME"
+            echo "🏷️ Version: $PUBLISH_VERSION"
+            echo "🌐 Registry: https://${{ inputs.registry }}"
+            exit 1
+          fi
+        fi
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
