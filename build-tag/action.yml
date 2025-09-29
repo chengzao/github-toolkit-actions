@@ -59,16 +59,23 @@ runs:
         # 创建新的标签名
         TAG_NAME="${CURRENT_BRANCH}_${DATE}_v${VERSION}"
 
-        git tag $TAG_NAME
-        git push origin $TAG_NAME
-        echo "Created new tag: $TAG_NAME"
-        echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+        echo "🏷️ Creating tag: $TAG_NAME"
+        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+
+        echo "📤 Pushing tag to origin..."
+        if git push origin $TAG_NAME; then
+          echo "✅ Tag $TAG_NAME pushed successfully"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+        else
+          echo "❌ Failed to push tag $TAG_NAME"
+          exit 1
+        fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
 
     - name: Create Changelog
-      if: inputs.create_changelog == 'true'
+      if: inputs.create_changelog == 'true' && steps.create_tag.outputs.tag_name != ''
       run: |
         echo "📝 Creating changelog..."
         if npx changelogithub; then
