@@ -58,7 +58,13 @@ runs:
 
     - name: Create Changelog
       if: steps.version_check.outputs.exists == 'false' && inputs.create_changelog == 'true'
-      run: npx changelogithub
+      run: |
+        echo "📝 Creating changelog..."
+        if npx changelogithub; then
+          echo "✅ Changelog created successfully"
+        else
+          echo "⚠️ Failed to create changelog, but continuing..."
+        fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
