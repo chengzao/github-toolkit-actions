@@ -8,16 +8,6 @@
 
 ## 🔧 开发和测试
 
-### 本地测试 Actions
-
-```bash
-# 克隆仓库
-git clone <your-repo-url>
-cd <your-repo-name>
-
-# 运行本地测试
-```
-
 ### 发布 Actions
 
 1. 为每个 action 创建独立的仓库：
