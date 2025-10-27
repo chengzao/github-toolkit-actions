@@ -1,0 +1,19 @@
+{
+  "name": "@chengzao/toolkit-actions",
+  "version": "1.0.0",
+  "description": "GitHub Actions Toolkit",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build required'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "github-actions",
+    "toolkit",
+    "automation"
+  ],
+  "author": "chengzao",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
