@@ -59,15 +59,6 @@ npm install -g changelogithub
 yarn global add changelogithub
 ```
 
-## 项目结构
-
-本 Action 遵循标准的 GitHub Actions 目录结构：
-
-```
-tag-on-version-change/
-└── action.yml          # Action 配置文件
-```
-
 ## 远程使用
 
 当发布到 `chengzao/toolkit-actions` 仓库后，可以使用以下格式引用：
