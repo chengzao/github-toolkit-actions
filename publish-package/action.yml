@@ -10,10 +10,6 @@ inputs:
     description: 'Node.js version to use'
     required: false
     default: '20'
-  package-manager:
-    description: 'Package manager to use (npm, yarn, pnpm)'
-    required: false
-    default: 'yarn'
   build-script:
     description: 'Build script to run'
     required: false
@@ -38,22 +34,7 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ inputs.package-manager }}
-
-    - name: Install Dependencies
-      run: ${{ inputs.package-manager }} install
-      shell: bash
-
-    - name: Build Packages
-      run: |
-        echo "🔨 Building packages using ${{ inputs.package-manager }}..."
-        if ${{ inputs.package-manager }} run ${{ inputs.build-script }}; then
-          echo "✅ Build completed successfully"
-        else
-          echo "❌ Build failed"
-          exit 1
-        fi
-      shell: bash
+        cache: npm
 
     - name: Creating .npmrc
       run: |
