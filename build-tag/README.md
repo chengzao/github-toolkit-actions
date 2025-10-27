@@ -23,12 +23,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
       - name: Build and tag
         uses: chengzao/toolkit-actions/build-tag@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'release'
-          node-version: '18'
           create_changelog: 'true'
 ```
 
@@ -38,7 +47,6 @@ jobs:
 |------|------|----------|--------|
 | `token` | GitHub token，用于创建标签和变更日志 | 否 | `${{ github.token }}` |
 | `prefix` | 用于标签名称的分支名 | 否 | `'release'` |
-| `node-version` | Node.js 版本 | 否 | `'18'` |
 | `create_changelog` | 是否使用 changelogithub 创建变更日志 | 否 | `'true'` |
 
 ## 输出

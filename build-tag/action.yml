@@ -22,15 +22,22 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    - name: Validate Node.js environment
+      run: |
+        if ! command -v node &> /dev/null; then
+          echo "❌ Node.js is not installed or not in PATH"
+          exit 1
+        fi
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ inputs.node-version }}
+        if ! command -v npm &> /dev/null; then
+          echo "❌ npm is not installed or not in PATH"
+          exit 1
+        fi
+
+        echo "✅ Node.js environment validation passed"
+        echo "📦 Node.js version: $(node --version)"
+        echo "📦 npm version: $(npm --version)"
+      shell: bash
 
     - name: Create a release tag
       id: create_tag
