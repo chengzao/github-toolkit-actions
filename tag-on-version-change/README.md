@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'yarn'
-          
+
       - name: Create tag
         uses: chengzao/toolkit-actions/tag-on-version-change@main
         with:
@@ -67,14 +67,6 @@ jobs:
 npm install -g changelogithub
 # 或
 yarn global add changelogithub
-```
-
-## 远程使用
-
-当发布到 `chengzao/toolkit-actions` 仓库后，可以使用以下格式引用：
-
-```yaml
-uses: chengzao/toolkit-actions/tag-on-version-change@main
 ```
 
 ## 本地开发

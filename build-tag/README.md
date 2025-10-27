@@ -49,10 +49,6 @@ jobs:
 | `prefix` | 用于标签名称的分支名 | 否 | `'release'` |
 | `create_changelog` | 是否使用 changelogithub 创建变更日志 | 否 | `'true'` |
 
-## 输出
-
-该 Action 会在环境变量中设置：
-- `TAG_NAME`: 创建的标签名称
 
 ## 标签命名规则
 
@@ -80,14 +76,6 @@ jobs:
 npm install -g changelogithub
 # 或
 yarn global add changelogithub
-```
-
-## 远程使用
-
-当发布到 `chengzao/toolkit-actions` 仓库后，可以使用以下格式引用：
-
-```yaml
-uses: chengzao/toolkit-actions/build-tag@main
 ```
 
 ## 本地开发

@@ -86,14 +86,6 @@ Action 会自动创建 `.npmrc` 文件，包含必要的认证信息：
 //npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
 ```
 
-## 远程使用
-
-当发布到 `chengzao/toolkit-actions` 仓库后，可以使用以下格式引用：
-
-```yaml
-uses: chengzao/toolkit-actions/publish-package@main
-```
-
 ## 本地开发
 
 在本地开发时，可以通过以下方式引用：
