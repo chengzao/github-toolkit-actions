@@ -1,5 +1,5 @@
-name: 'Tag on Version Change'
-description: 'Creates a Git tag when package.json version changes and generates changelog'
+name: 'Auto Tag and Changelog'
+description: 'Automatically creates Git tags on version changes and generates changelog with changelogithub'
 author: 'chengzao'
 
 inputs:

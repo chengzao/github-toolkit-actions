@@ -1,19 +1,19 @@
-# Tag on Version Change Action
+# Auto Tag and Changelog Action
 
-一个用于在 package.json 版本变更时自动创建 Git 标签的 GitHub Action。
+一个用于在 package.json 版本变更时自动创建 Git 标签和变更日志的 GitHub Action。
 
 ## 功能特性
 
-- 🔍 自动检测 `package.json` 版本变更
-- 🏷️ 创建带 `v` 前缀的 Git 标签
-- 📝 支持生成 Changelog（可选）
-- ✅ 防止重复创建已存在的标签
-- 🚀 自动推送标签到远程仓库
+- 🔍 自动检测版本变更
+- 🏷️ 创建 Git 标签
+- 📝 生成 Changelog（可选）
+- ✅ 避免重复标签
+- 🚀 自动推送标签
 
 ## 使用方法
 
 ```yaml
-name: Create Tag on Version Change
+name: Auto Tag and Changelog
 
 on:
   push:
@@ -34,8 +34,8 @@ jobs:
         with:
           cache: 'yarn'
 
-      - name: Create tag
-        uses: chengzao/toolkit-actions/tag-on-version-change@main
+      - name: Auto tag and changelog
+        uses: chengzao/toolkit-actions/version-tag@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           create_changelog: 'true'
@@ -74,7 +74,7 @@ yarn global add changelogithub
 在本地开发时，可以通过以下方式引用：
 
 ```yaml
-uses: ./tag-on-version-change
+uses: ./version-tag
 ```
 
 ## 许可证

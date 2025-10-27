@@ -42,7 +42,7 @@ jobs:
         run: yarn build
 
       - name: Publish package
-        uses: chengzao/toolkit-actions/publish-package@main
+        uses: chengzao/toolkit-actions/publish-github@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: 'npm.pkg.github.com'
@@ -91,7 +91,7 @@ Action 会自动创建 `.npmrc` 文件，包含必要的认证信息：
 在本地开发时，可以通过以下方式引用：
 
 ```yaml
-uses: ./publish-package
+uses: ./publish-github
 ```
 
 ## 许可证
