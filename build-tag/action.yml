@@ -10,10 +10,6 @@ inputs:
     description: 'Prefix name to use in tag name'
     required: false
     default: 'release'
-  node-version:
-    description: 'Node.js version to use'
-    required: false
-    default: '18'
   create_changelog:
     description: 'Whether to create changelog using changelogithub'
     required: false
