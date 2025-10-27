@@ -45,7 +45,7 @@ runs:
         DATE=$(date +"%Y_%m_%d")
 
         # 分支名称
-        CURRENT_BRANCH="${{ inputs.prefix }}"
+        CURRENT_BRANCH="$INPUT_PREFIX"
 
         # 获取最新版本号
         LATEST_TAG=$(git tag -l "${CURRENT_BRANCH}_${DATE}_v*" | sort -V | tail -n1)
@@ -76,6 +76,7 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        INPUT_PREFIX: ${{ inputs.prefix }}
 
     - name: Create Changelog
       if: inputs.create_changelog == 'true' && steps.create_tag.outputs.tag_name != ''

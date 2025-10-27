@@ -38,12 +38,14 @@ runs:
       run: |
         rm -rf .npmrc
         cat << EOF > "$HOME/.npmrc"
-          ${{ inputs.scope }}:registry=https://${{ inputs.registry }}
-          //${{ inputs.registry }}/:_authToken=$GITHUB_TOKEN
+          ${INPUT_SCOPE}:registry=https://${INPUT_REGISTRY}
+          //${INPUT_REGISTRY}/:_authToken=$GITHUB_TOKEN
         EOF
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        INPUT_SCOPE: ${{ inputs.scope }}
+        INPUT_REGISTRY: ${{ inputs.registry }}
 
     - name: Publish to Github Packages
       run: |
@@ -67,29 +69,30 @@ runs:
 
         echo "📦 Publishing package: $PACKAGE_NAME"
         echo "🏷️ Version: $PUBLISH_VERSION"
-        echo "🌐 Registry: https://${{ inputs.registry }}"
+        echo "🌐 Registry: https://$INPUT_REGISTRY"
 
         # Check if npm package version already exists
-        if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://${{ inputs.registry }}" --json >/dev/null 2>&1; then
+        if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://$INPUT_REGISTRY" --json >/dev/null 2>&1; then
           echo "⚠️ Version $PUBLISH_VERSION already exists, skipping publish"
           echo "📦 Package: $PACKAGE_NAME"
           echo "🏷️ Version: $PUBLISH_VERSION"
-          echo "🌐 Registry: https://${{ inputs.registry }}"
+          echo "🌐 Registry: https://$INPUT_REGISTRY"
         else
           echo "🚀 Publishing to registry..."
-          if npm publish --registry="https://${{ inputs.registry }}"; then
+          if npm publish --registry="https://$INPUT_REGISTRY"; then
             echo "✅ Successfully published!"
             echo "📦 Package: $PACKAGE_NAME"
             echo "🏷️ Version: $PUBLISH_VERSION"
-            echo "🌐 Registry: https://${{ inputs.registry }}"
+            echo "🌐 Registry: https://$INPUT_REGISTRY"
           else
             echo "❌ Publish failed!"
             echo "📦 Package: $PACKAGE_NAME"
             echo "🏷️ Version: $PUBLISH_VERSION"
-            echo "🌐 Registry: https://${{ inputs.registry }}"
+            echo "🌐 Registry: https://$INPUT_REGISTRY"
             exit 1
           fi
         fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        INPUT_REGISTRY: ${{ inputs.registry }}

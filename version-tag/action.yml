@@ -53,7 +53,7 @@ runs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
 
-        VERSION="${{ steps.version_check.outputs.version }}"
+        VERSION="$STEP_VERSION"
         TAG_NAME="v$VERSION"
 
         echo "🏷️ Creating tag: $TAG_NAME"
@@ -67,6 +67,8 @@ runs:
           exit 1
         fi
       shell: bash
+      env:
+        STEP_VERSION: ${{ steps.version_check.outputs.version }}
 
     - name: Create Changelog
       if: steps.version_check.outputs.exists == 'false' && inputs.create_changelog == 'true'
