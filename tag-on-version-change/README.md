@@ -24,6 +24,16 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'yarn'
+          
       - name: Create tag
         uses: chengzao/toolkit-actions/tag-on-version-change@main
         with:

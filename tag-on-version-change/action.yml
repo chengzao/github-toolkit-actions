@@ -14,10 +14,22 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    - name: Validate Node.js environment
+      run: |
+        if ! command -v node &> /dev/null; then
+          echo "❌ Node.js is not installed or not in PATH"
+          exit 1
+        fi
+
+        if ! command -v npm &> /dev/null; then
+          echo "❌ npm is not installed or not in PATH"
+          exit 1
+        fi
+
+        echo "✅ Node.js environment validation passed"
+        echo "📦 Node.js version: $(node --version)"
+        echo "📦 npm version: $(npm --version)"
+      shell: bash
 
     - name: Check if version changed
       id: version_check
