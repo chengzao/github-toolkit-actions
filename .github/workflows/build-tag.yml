@@ -20,7 +20,7 @@ jobs:
 
       - name: Verify trigger Info
         run: |
-          echo "Verify trigger Info"
+          echo ""
           echo "============== 🏷️ Verify trigger Info =============="
           echo "📁 事件类型: ${{ github.event_name }}"
           echo "🏠 仓库: ${{ github.repository }}"
