@@ -20,19 +20,16 @@ jobs:
 
       - name: Verify trigger reason
         run: |
-          echo "🚀 GitHub Actions 工作流执行信息"
           echo "=================================="
           echo "📁 事件类型: ${{ github.event_name }}"
           echo "🏠 仓库: ${{ github.repository }}"
-          echo "🔗 工作流: ${{ github.workflow }}"
           echo "👤 工作流发起者: ${{ github.actor }}"
           echo "🔍 事件发送者: ${{ github.event.sender.login }}"
           echo "🌿 当前分支: ${{ github.ref_name }}"
-          echo "🔗 提交哈希: ${{ github.sha }}"
-          echo "� 提交信息: ${{ github.event.head_commit.message || 'N/A' }}"
           echo "📅 提交时间: ${{ github.event.head_commit.timestamp || 'N/A' }}"
           echo "👤 提交作者: ${{ github.event.head_commit.author.name || 'N/A' }}"
           echo "🔗 提交URL: ${{ github.event.head_commit.url || 'N/A' }}"
+          echo "� 提交信息: \n${{ github.event.head_commit.message || 'N/A' }}\n"
         shell: bash
 
       - name: 📅 Build and Tag
