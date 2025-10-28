@@ -42,9 +42,38 @@ jobs:
 
 ## 输出参数
 
-| 输出名 | 描述 |
-|--------|------|
-| `changelog_created` | changelog是否成功创建 (`true`/`false`) |
+| 输出名 | 描述 | 可能值 |
+|--------|------|--------|
+| `changelog_created` | changelog是否成功创建 | `true` - changelog成功创建<br>`false` - changelog创建失败或无需创建 |
+
+## 使用输出参数
+
+你可以在后续步骤中使用这个输出参数来执行条件操作：
+
+```yaml
+- name: Create Changelog
+  id: changelog
+  uses: chengzao/github-toolkit-actions/changelog@main
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Check changelog creation result
+  run: |
+    if [ "${{ steps.changelog.outputs.changelog_created }}" = "true" ]; then
+      echo "✅ Changelog was created successfully"
+      # 在这里添加changelog创建成功后的逻辑
+    else
+      echo "⚠️ Changelog was not created or creation failed"
+      # 在这里添加changelog创建失败后的逻辑
+    fi
+```
+
+## 输出参数详细说明
+
+- `changelog_created`: 布尔值，表示changelog创建操作的状态
+  - 当 changelogithub 工具成功运行时，值为 `true`
+  - 当安装失败、运行失败或其他错误发生时，值为 `false`
+  - 即使创建失败，action也会继续执行后续步骤，不会中断工作流
 
 ## 要求
 

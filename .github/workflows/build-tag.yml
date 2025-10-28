@@ -26,6 +26,16 @@ jobs:
           create_changelog: true
 
       - name: Create Changelog
+        id: changelog
         uses: ./changelog
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check changelog creation result
+        run: |
+          if [ "${{ steps.changelog.outputs.changelog_created }}" = "true" ]; then
+            echo "✅ Changelog was created successfully"
+          else
+            echo "⚠️ Changelog was not created or creation failed"
+          fi
+        shell: bash    
