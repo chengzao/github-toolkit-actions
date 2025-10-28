@@ -33,23 +33,29 @@ runs:
         echo "📦 npm version: $(npm --version)"
       shell: bash
 
-    - name: Create Changelog
-      id: changelog
+    - name: Cache changelogithub
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-npm-changelogithub-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-npm-changelogithub-
+    
+    - name: Install changelogithub
       run: |
-        echo ""
-        # 设置版本变量
         CHANGELOG_VERSION="latest"
-        
-        # 安装changelogithub
-        echo "📦 Installing changelogithub version: $CHANGELOG_VERSION"
+        echo "📦 Installing changelogithub@$CHANGELOG_VERSION"
         if ! npm install -g changelogithub@${CHANGELOG_VERSION}; then
           echo "❌ Failed to install changelogithub"
           echo "changelog_created=false" >> "$GITHUB_OUTPUT"
           exit 1
         fi
+      shell: bash
 
-        # 运行changelog生成
-        echo "🚀 Running changelogeneration..."
+    - name: Create Changelog
+      id: changelog
+      run: |
+        echo "🚀 Running changelogithub..."
         if npx changelogithub; then
           echo "✅ Changelog created successfully"
           echo "changelog_created=true" >> "$GITHUB_OUTPUT"

@@ -61,10 +61,8 @@ jobs:
   run: |
     if [ "${{ steps.changelog.outputs.changelog_created }}" = "true" ]; then
       echo "✅ Changelog was created successfully"
-      # 在这里添加changelog创建成功后的逻辑
     else
       echo "⚠️ Changelog was not created or creation failed"
-      # 在这里添加changelog创建失败后的逻辑
     fi
 ```
 
@@ -73,7 +71,6 @@ jobs:
 - `changelog_created`: 布尔值，表示changelog创建操作的状态
   - 当 changelogithub 工具成功运行时，值为 `true`
   - 当安装失败、运行失败或其他错误发生时，值为 `false`
-  - 即使创建失败，action也会继续执行后续步骤，不会中断工作流
 
 ## 要求
 
