@@ -45,11 +45,25 @@ runs:
         echo "📦 npm version: $(npm --version)"
       shell: bash
 
+    - name: Verify trigger Info
+      run: |
+        echo ""
+        echo "=================== 🏷️ Verify trigger Info ==================="
+        echo "📁 事件类型: ${{ github.event_name }}"
+        echo "🏠 仓库: ${{ github.repository }}"
+        echo "👤 工作流发起者: ${{ github.actor }}"
+        echo "🔍 事件发送者: ${{ github.event.sender.login }}"
+        echo "🌿 当前分支: ${{ github.ref_name }}"
+        echo "👤 提交作者: ${{ github.event.head_commit.author.name || 'N/A' }}"
+        echo "📅 提交时间: ${{ github.event.head_commit.timestamp || 'N/A' }}"
+        echo "🔗 提交URL: ${{ github.event.head_commit.url || 'N/A' }}"
+      shell: bash
+
     - name: Create a release tag
       id: create_tag
       run: |
         echo ""
-        echo "============== 🏷️ Creating release tag =============="
+        echo "=================== 🏷️ Creating release tag ==================="
         git config --global user.name "$GIT_USER_NAME"
         git config --global user.email "$GIT_USER_EMAIL"
 
@@ -96,7 +110,7 @@ runs:
       if: inputs.create_changelog == 'true' && steps.create_tag.outputs.tag_name != ''
       run: |
         echo ""
-        echo "============== 🏷️ Creating changelog =============="
+        echo "===================== 🏷️ Creating changelog ====================="
         if npx changelogithub; then
           echo "✅ Changelog created successfully"
         else
