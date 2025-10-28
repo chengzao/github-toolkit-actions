@@ -34,7 +34,7 @@ jobs:
           node-version: 18
 
       - name: Build and tag
-        uses: chengzao/toolkit-actions/build-tag@main
+        uses: chengzao/github-toolkit-actions/build-tag@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'release'

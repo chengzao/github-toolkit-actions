@@ -35,7 +35,7 @@ jobs:
           cache: 'yarn'
 
       - name: Auto tag and changelog
-        uses: chengzao/toolkit-actions/version-tag@main
+        uses: chengzao/github-toolkit-actions/version-tag@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           create_changelog: 'true'

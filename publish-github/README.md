@@ -42,7 +42,7 @@ jobs:
         run: yarn build
 
       - name: Publish package
-        uses: chengzao/toolkit-actions/publish-github@main
+        uses: chengzao/github-toolkit-actions/publish-github@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: 'npm.pkg.github.com'
