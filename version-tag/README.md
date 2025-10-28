@@ -15,6 +15,9 @@
 ```yaml
 name: Auto Tag and Changelog
 
+permissions:
+  contents: write
+
 on:
   push:
     paths:

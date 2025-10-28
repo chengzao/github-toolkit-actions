@@ -16,6 +16,10 @@
 ```yaml
 name: Publish Package
 
+permissions:
+  contents: write
+  packages: write
+
 on:
   push:
     paths:

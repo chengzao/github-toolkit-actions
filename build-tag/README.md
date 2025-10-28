@@ -15,6 +15,9 @@
 ```yaml
 name: Build and Tag
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [main, master]
@@ -47,7 +50,7 @@ jobs:
 |------|------|----------|--------|
 | `token` | GitHub token，用于创建标签和变更日志 | 否 | `${{ github.token }}` |
 | `prefix` | 用于标签名称的分支名 | 否 | `'release'` |
-| `create_changelog` | 是否使用 changelogithub 创建变更日志 | 否 | `'true'` |
+| `create_changelog` | 是否使用创建变更日志 | 否 | `'true'` |
 
 
 ## 标签命名规则
@@ -67,16 +70,9 @@ jobs:
 ## 依赖要求
 
 - 需要 Git 仓库配置
-- 需要安装 `changelogithub` 包（用于生成变更日志）
 - 需要配置 Git 用户信息
+- 需要配置 Token 以允许推送标签
 
-## 安装依赖
-
-```bash
-npm install -g changelogithub
-# 或
-yarn global add changelogithub
-```
 
 ## 本地开发
 
