@@ -42,14 +42,18 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           create_changelog: 'true'
+          git_user_name: 'Your Name'
+          git_user_email: 'your.email@example.com'
 ```
 
 ## 输入参数
 
 | 参数 | 描述 | 是否必需 | 默认值 |
 |------|------|----------|--------|
-| `token` | GitHub token，用于创建标签和变更日志 | 否 | `${{ github.token }}` |
+| `token` | GitHub token，用于创建标签和变更日志 | 是 | - |
 | `create_changelog` | 是否使用 changelogithub 创建变更日志 | 否 | `'true'` |
+| `git_user_name` | Git 用户名称，通过环境变量传递给 git config | 否 | `'github-actions'` |
+| `git_user_email` | Git 用户邮箱，通过环境变量传递给 git config | 否 | `'github-actions@github.com'` |
 
 ## 输出
 
