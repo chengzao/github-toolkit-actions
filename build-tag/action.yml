@@ -28,6 +28,7 @@ runs:
   steps:
     - name: Validate Node.js environment
       run: |
+        echo "============== 🏷️ Validate Node.js environment =============="
         if ! command -v node &> /dev/null; then
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
@@ -46,6 +47,7 @@ runs:
     - name: Create a release tag
       id: create_tag
       run: |
+        echo "============== 🏷️ Creating release tag =============="
         git config --global user.name "$GIT_USER_NAME"
         git config --global user.email "$GIT_USER_EMAIL"
 
@@ -91,7 +93,7 @@ runs:
     - name: Create Changelog
       if: inputs.create_changelog == 'true' && steps.create_tag.outputs.tag_name != ''
       run: |
-        echo "📝 Creating changelog..."
+        echo "============== 🏷️ Creating changelog =============="
         if npx changelogithub; then
           echo "✅ Changelog created successfully"
         else

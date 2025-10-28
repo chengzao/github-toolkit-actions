@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Verify trigger reason
+      - name: Verify trigger Info
         run: |
           echo "=================================="
           echo "📁 事件类型: ${{ github.event_name }}"
@@ -26,14 +26,12 @@ jobs:
           echo "👤 工作流发起者: ${{ github.actor }}"
           echo "🔍 事件发送者: ${{ github.event.sender.login }}"
           echo "🌿 当前分支: ${{ github.ref_name }}"
-          echo "📅 提交时间: ${{ github.event.head_commit.timestamp || 'N/A' }}"
           echo "👤 提交作者: ${{ github.event.head_commit.author.name || 'N/A' }}"
+          echo "📅 提交时间: ${{ github.event.head_commit.timestamp || 'N/A' }}"
           echo "🔗 提交URL: ${{ github.event.head_commit.url || 'N/A' }}"
-          echo "📝 提交信息:"
-          echo "${{ github.event.head_commit.message || 'N/A' }}" | sed 's/^/  /'
         shell: bash
 
-      - name: 📅 Build and Tag
+      - name: Build and Tag
         uses: ./build-tag
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
