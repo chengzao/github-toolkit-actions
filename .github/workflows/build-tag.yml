@@ -24,3 +24,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'main'
           create_changelog: true
+
+      - name: Create Changelog
+        uses: ./changelog
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

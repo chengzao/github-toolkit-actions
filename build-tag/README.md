@@ -7,8 +7,6 @@
 - 📅 按日期生成版本标签（如：`main_2024_01_15_v1`）
 - 🔢 自动递增每日版本号
 - 🏷️ 创建和推送标签到远程仓库
-- 📝 支持生成 Changelog（可选）
-- ⚡ 智能版本管理，避免重复标签
 
 ## 使用方法
 
@@ -41,7 +39,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'release'
-          create_changelog: 'true'
           git_user_name: 'Your Name'
           git_user_email: 'your.email@example.com'
 ```
@@ -52,7 +49,6 @@ jobs:
 |------|------|----------|--------|
 | `token` | GitHub token，用于创建标签和变更日志 | 是 | - |
 | `prefix` | 用于标签名称的分支名 | 否 | `'release'` |
-| `create_changelog` | 是否使用创建变更日志 | 否 | `'true'` |
 | `git_user_name` | Git 用户名称，通过环境变量传递给 git config | 否 | `'github-actions'` |
 | `git_user_email` | Git 用户邮箱，通过环境变量传递给 git config | 否 | `'github-actions@github.com'` |
 

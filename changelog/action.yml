@@ -1,0 +1,60 @@
+name: 'Create Changelog'
+description: 'Creates changelog using changelogithub tool'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for changelog creation'
+    required: true
+
+outputs:
+  changelog_created:
+    description: 'Whether changelog was created successfully'
+    value: ${{ steps.changelog.outputs.changelog_created }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate Node.js environment
+      run: |
+        if ! command -v node &> /dev/null; then
+          echo "❌ Node.js is not installed or not in PATH"
+          exit 1
+        fi
+
+        if ! command -v npm &> /dev/null; then
+          echo "❌ npm is not installed or not in PATH"
+          exit 1
+        fi
+
+        echo "✅ Node.js environment validation passed"
+        echo "📦 Node.js version: $(node --version)"
+        echo "📦 npm version: $(npm --version)"
+      shell: bash
+
+    - name: Create Changelog
+      id: changelog
+      run: |
+        # 设置版本变量
+        CHANGELOG_VERSION="latest"
+        
+        # 安装changelogithub
+        echo "📦 Installing changelogithub version: $CHANGELOG_VERSION"
+        if ! npm install -g changelogithub@${CHANGELOG_VERSION}; then
+          echo "❌ Failed to install changelogithub"
+          echo "changelog_created=false" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+
+        # 运行changelog生成
+        echo "🚀 Running changelogeneration..."
+        if npx changelogithub; then
+          echo "✅ Changelog created successfully"
+          echo "changelog_created=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "⚠️ Failed to create changelog, but continuing..."
+          echo "changelog_created=false" >> "$GITHUB_OUTPUT"
+        fi
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
