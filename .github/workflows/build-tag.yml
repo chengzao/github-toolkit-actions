@@ -19,12 +19,14 @@ jobs:
           node-version: 18
 
       - name: Build and Tag
+        id: build-tag
         uses: ./build-tag
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'main'
 
       - name: Create Changelog
+        if: steps.build-tag.outputs.tag_created == 'true'
         id: changelog
         uses: ./changelog
         with:

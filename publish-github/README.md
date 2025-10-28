@@ -61,6 +61,56 @@ jobs:
 | `registry` | 包注册表 URL | 否 | `'npm.pkg.github.com'` |
 | `scope` | 包作用域（例如：@your-org） | 是 | - |
 
+## 输出参数
+
+| 输出名 | 描述 | 可能值 |
+|--------|------|--------|
+| `package_name` | 发布的包名称 | 包名称字符串 |
+| `package_version` | 发布的包版本 | 版本号字符串 |
+| `publish_success` | 包是否成功发布 | `true` - 发布成功<br>`false` - 发布失败或跳过 |
+| `skip_publish` | 是否因版本已存在而跳过发布 | `true` - 跳过发布<br>`false` - 正常发布流程 |
+
+## 使用输出参数
+
+你可以在后续步骤中使用这些输出参数来执行条件操作：
+
+```yaml
+- name: Publish package
+  id: publish_pkg
+  uses: chengzao/github-toolkit-actions/publish-github@main
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    registry: 'npm.pkg.github.com'
+    scope: '@your-org'
+
+- name: Check publish result
+  run: |
+    echo "包名称: ${{ steps.publish_pkg.outputs.package_name }}"
+    echo "包版本: ${{ steps.publish_pkg.outputs.package_version }}"
+    
+    if [ "${{ steps.publish_pkg.outputs.publish_success }}" = "true" ]; then
+      echo "✅ 包发布成功"
+      # 在这里添加发布成功后的逻辑
+    elif [ "${{ steps.publish_pkg.outputs.skip_publish }}" = "true" ]; then
+      echo "⚠️ 版本已存在，跳过发布"
+      # 在这里添加跳过发布后的逻辑
+    else
+      echo "❌ 包发布失败"
+      # 在这里添加发布失败后的逻辑
+    fi
+```
+
+## 输出参数详细说明
+
+- `package_name`: 字符串，从 package.json 读取的包名称
+- `package_version`: 字符串，从 package.json 读取的版本号
+- `publish_success`: 布尔值，表示发布操作是否成功
+  - 当发布成功时，值为 `true`
+  - 当发布失败或因版本存在跳过时，值为 `false`
+- `skip_publish`: 布尔值，表示是否因版本已存在而跳过发布
+  - 当版本已存在且跳过发布时，值为 `true`
+  - 当正常发布流程时，值为 `false`
+
 ## 工作流程
 
 1. **检出代码** - 获取仓库的完整历史

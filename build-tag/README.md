@@ -52,6 +52,50 @@ jobs:
 | `git_user_name` | Git 用户名称，通过环境变量传递给 git config | 否 | `'github-actions'` |
 | `git_user_email` | Git 用户邮箱，通过环境变量传递给 git config | 否 | `'github-actions@github.com'` |
 
+## 输出参数
+
+| 输出名 | 描述 | 可能值 |
+|--------|------|--------|
+| `tag_name` | 创建的标签名称 | 标签名称字符串（如：`main_2024_01_15_v1`）<br>创建失败时为空字符串 |
+| `tag_created` | 标签是否成功创建并推送 | `true` - 标签成功创建和推送<br>`false` - 标签创建失败或推送失败 |
+
+## 使用输出参数
+
+你可以在后续步骤中使用这些输出参数来执行条件操作：
+
+```yaml
+- name: Build and tag
+  id: build_tag
+  uses: chengzao/github-toolkit-actions/build-tag@main
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    prefix: 'main'
+
+- name: Use tag output
+  run: |
+    echo "创建的标签: ${{ steps.build_tag.outputs.tag_name }}"
+    
+    if [ "${{ steps.build_tag.outputs.tag_created }}" = "true" ]; then
+      echo "✅ 标签创建成功"
+      # 在这里添加标签创建成功后的逻辑
+      # 例如：触发发布流程、发送通知等
+    else
+      echo "❌ 标签创建失败"
+      # 在这里添加标签创建失败后的逻辑
+    fi
+```
+
+## 输出参数详细说明
+
+- `tag_name`: 字符串，表示成功创建的标签名称
+  - 格式：`${prefix}_${YYYY}_${MM}_${DD}_v${version}`
+  - 当创建失败时，该值为空字符串
+  - 可用于后续步骤中的标签引用或通知
+
+- `tag_created`: 布尔值，表示标签创建操作的状态
+  - 当标签成功创建并推送到远程仓库时，值为 `true`
+  - 当创建标签、推送标签失败或遇到其他错误时，值为 `false`
+  - 建议使用此参数进行条件判断来决定后续操作
 
 ## 标签命名规则
 

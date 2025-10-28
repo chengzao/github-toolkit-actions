@@ -14,6 +14,20 @@ inputs:
     description: 'Package scope (e.g., @your-org)'
     required: true
 
+outputs:
+  package_name:
+    description: 'The name of the published package'
+    value: ${{ steps.publish.outputs.package_name }}
+  package_version:
+    description: 'The version of the published package'
+    value: ${{ steps.publish.outputs.package_version }}
+  publish_success:
+    description: 'Whether the package was published successfully'
+    value: ${{ steps.publish.outputs.publish_success }}
+  skip_publish:
+    description: 'Whether the publish was skipped due to existing version'
+    value: ${{ steps.publish.outputs.skip_publish }}
+
 runs:
   using: 'composite'
   steps:
@@ -50,6 +64,7 @@ runs:
         INPUT_REGISTRY: ${{ inputs.registry }}
 
     - name: Publish to Github Packages
+      id: publish
       run: |
         echo ""
         # Cleanup function to remove .npmrc
@@ -74,12 +89,18 @@ runs:
         echo "🏷️ Version: $PUBLISH_VERSION"
         echo "🌐 Registry: https://$INPUT_REGISTRY"
 
+        # 设置基本输出参数
+        echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+        echo "package_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
+        
         # Check if npm package version already exists
         if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://$INPUT_REGISTRY" --json >/dev/null 2>&1; then
           echo "⚠️ Version $PUBLISH_VERSION already exists, skipping publish"
           echo "📦 Package: $PACKAGE_NAME"
           echo "🏷️ Version: $PUBLISH_VERSION"
           echo "🌐 Registry: https://$INPUT_REGISTRY"
+          echo "publish_success=false" >> "$GITHUB_OUTPUT"
+          echo "skip_publish=true" >> "$GITHUB_OUTPUT"
         else
           echo "🚀 Publishing to registry..."
           if npm publish --registry="https://$INPUT_REGISTRY"; then
@@ -87,11 +108,15 @@ runs:
             echo "📦 Package: $PACKAGE_NAME"
             echo "🏷️ Version: $PUBLISH_VERSION"
             echo "🌐 Registry: https://$INPUT_REGISTRY"
+            echo "publish_success=true" >> "$GITHUB_OUTPUT"
+            echo "skip_publish=false" >> "$GITHUB_OUTPUT"
           else
             echo "❌ Publish failed!"
             echo "📦 Package: $PACKAGE_NAME"
             echo "🏷️ Version: $PUBLISH_VERSION"
             echo "🌐 Registry: https://$INPUT_REGISTRY"
+            echo "publish_success=false" >> "$GITHUB_OUTPUT"
+            echo "skip_publish=false" >> "$GITHUB_OUTPUT"
             exit 1
           fi
         fi

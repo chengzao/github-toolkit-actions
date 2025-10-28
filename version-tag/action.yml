@@ -1,15 +1,11 @@
-name: 'Auto Tag and Changelog'
-description: 'Automatically creates Git tags on version changes and generates changelog with changelogithub'
+name: 'Auto Tag'
+description: 'Automatically creates Git tags on version changes'
 author: 'chengzao'
 
 inputs:
   token:
-    description: 'GitHub token for creating tags and changelog'
+    description: 'GitHub token for creating tags'
     required: true
-  create_changelog:
-    description: 'Whether to create changelog using changelogithub'
-    required: false
-    default: 'true'
   git_user_name:
     description: 'Git user name for commits and tags'
     required: false
@@ -18,6 +14,20 @@ inputs:
     description: 'Git user email for commits and tags'
     required: false
     default: 'github-actions@github.com'
+
+outputs:
+  version:
+    description: 'The package version from package.json'
+    value: ${{ steps.version_check.outputs.version }}
+  tag_exists:
+    description: 'Whether the tag already exists'
+    value: ${{ steps.version_check.outputs.exists }}
+  tag_created:
+    description: 'Whether the tag was created successfully'
+    value: ${{ steps.create_tag.outputs.tag_created }}
+  tag_name:
+    description: 'The name of the created tag'
+    value: ${{ steps.create_tag.outputs.tag_name }}
 
 runs:
   using: 'composite'
@@ -58,6 +68,7 @@ runs:
       shell: bash
 
     - name: Create Git tag
+      id: create_tag
       if: steps.version_check.outputs.exists == 'false'
       run: |
         echo ""
@@ -70,11 +81,17 @@ runs:
         echo "🏷️ Creating tag: $TAG_NAME"
         git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
 
+        # 设置标签名称输出
+        echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+
         echo "📤 Pushing tag to origin..."
         if git push origin "$TAG_NAME"; then
           echo "✅ Successfully created and pushed tag $TAG_NAME"
+          echo "tag_created=true" >> "$GITHUB_OUTPUT"
         else
           echo "❌ Failed to push tag $TAG_NAME"
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          echo "tag_name=" >> "$GITHUB_OUTPUT"  # 清除标签名称，因为创建失败
           exit 1
         fi
       shell: bash
@@ -82,17 +99,3 @@ runs:
         GIT_USER_NAME: ${{ inputs.git_user_name }}
         GIT_USER_EMAIL: ${{ inputs.git_user_email }}
         STEP_VERSION: ${{ steps.version_check.outputs.version }}
-
-    - name: Create Changelog
-      if: steps.version_check.outputs.exists == 'false' && inputs.create_changelog == 'true'
-      run: |
-        echo ""
-        echo "📝 Creating changelog..."
-        if npx changelogithub; then
-          echo "✅ Changelog created successfully"
-        else
-          echo "⚠️ Failed to create changelog, but continuing..."
-        fi
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.token }}

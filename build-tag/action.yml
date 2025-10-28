@@ -19,6 +19,13 @@ inputs:
     required: false
     default: 'github-actions@github.com'
 
+outputs:
+  tag_name:
+    description: 'The name of the created tag'
+    value: ${{ steps.create_tag.outputs.tag_name }}
+  tag_created:
+    description: 'Whether the tag was created successfully'
+    value: ${{ steps.create_tag.outputs.tag_created }}
 runs:
   using: 'composite'
   steps:
@@ -88,11 +95,16 @@ runs:
         git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
 
         echo "📤 Pushing tag to origin..."
+        # 设置默认值
+        echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+        
         if git push origin $TAG_NAME; then
           echo "✅ Tag $TAG_NAME pushed successfully"
-          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag_created=true" >> "$GITHUB_OUTPUT"
         else
           echo "❌ Failed to push tag $TAG_NAME"
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          echo "tag_name=" >> "$GITHUB_OUTPUT"  # 清除标签名称，因为创建失败
           exit 1
         fi
       shell: bash
