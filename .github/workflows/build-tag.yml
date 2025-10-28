@@ -23,7 +23,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'main'
-          create_changelog: true
 
       - name: Create Changelog
         id: changelog
@@ -33,6 +32,7 @@ jobs:
 
       - name: Check changelog creation result
         run: |
+          echo ""
           if [ "${{ steps.changelog.outputs.changelog_created }}" = "true" ]; then
             echo "✅ Changelog was created successfully"
           else

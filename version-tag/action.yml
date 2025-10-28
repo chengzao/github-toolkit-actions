@@ -24,6 +24,7 @@ runs:
   steps:
     - name: Validate Node.js environment
       run: |
+        echo ""
         if ! command -v node &> /dev/null; then
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
@@ -42,6 +43,7 @@ runs:
     - name: Check if version changed
       id: version_check
       run: |
+        echo ""
         VERSION=$(node -p "require('./package.json').version")
         echo "Current version: $VERSION"
 
@@ -58,6 +60,7 @@ runs:
     - name: Create Git tag
       if: steps.version_check.outputs.exists == 'false'
       run: |
+        echo ""
         git config --global user.name "$GIT_USER_NAME"
         git config --global user.email "$GIT_USER_EMAIL"
 
@@ -83,6 +86,7 @@ runs:
     - name: Create Changelog
       if: steps.version_check.outputs.exists == 'false' && inputs.create_changelog == 'true'
       run: |
+        echo ""
         echo "📝 Creating changelog..."
         if npx changelogithub; then
           echo "✅ Changelog created successfully"

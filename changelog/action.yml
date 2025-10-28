@@ -17,6 +17,7 @@ runs:
   steps:
     - name: Validate Node.js environment
       run: |
+        echo ""
         if ! command -v node &> /dev/null; then
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
@@ -35,6 +36,7 @@ runs:
     - name: Create Changelog
       id: changelog
       run: |
+        echo ""
         # 设置版本变量
         CHANGELOG_VERSION="latest"
         

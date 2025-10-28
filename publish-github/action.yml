@@ -19,6 +19,7 @@ runs:
   steps:
     - name: Validate Node.js environment
       run: |
+        echo ""
         if ! command -v node &> /dev/null; then
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
@@ -36,6 +37,7 @@ runs:
 
     - name: Creating .npmrc
       run: |
+        echo ""
         rm -rf .npmrc
         cat << EOF > "$HOME/.npmrc"
           ${INPUT_SCOPE}:registry=https://${INPUT_REGISTRY}
@@ -49,6 +51,7 @@ runs:
 
     - name: Publish to Github Packages
       run: |
+        echo ""
         # Cleanup function to remove .npmrc
         cleanup() {
           rm -f "$HOME/.npmrc" 2>/dev/null || true
