@@ -27,8 +27,13 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        cache: 'npm'
-        cache-dependency-path: ${{ github.action_path }}/package-lock.json
+
+    - name: Debug workspace
+      run: |
+        echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE"
+        ls -al
+        ls -al changelog-v2 || true
+      shell: bash
 
     - name: Install dependencies
       run: |
