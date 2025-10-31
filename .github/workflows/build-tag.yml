@@ -34,6 +34,7 @@ jobs:
         uses: chengzao/github-toolkit-actions/changelog-v4@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          allow-failure: false
 
       - name: Check changelog creation result
         run: |
