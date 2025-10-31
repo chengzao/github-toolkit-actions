@@ -59,9 +59,10 @@ runs:
       id: changelog
       run: |
         set -u
-        echo "🚀 Running changelog generation script..."
+        echo "🚀 Running changelogithub in repository workspace..."
         echo "📂 Working directory: $PWD"
-        if npm run generate; then
+        echo "🧰 Using changelogithub from: ${{ github.action_path }}/node_modules/.bin/changelogithub"
+        if "${{ github.action_path }}/node_modules/.bin/changelogithub"; then
           echo "✅ Changelog created successfully"
           echo "changelog_created=true" >> "$GITHUB_OUTPUT"
         else
@@ -74,6 +75,6 @@ runs:
           echo "ℹ️ Continuing despite failure because allow-failure is true"
         fi
       shell: bash
-      working-directory: ${{ github.action_path }}
+      working-directory: ${{ github.workspace }}
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
