@@ -47,7 +47,6 @@ runs:
         if ! npm install -g changelogithub; then
           echo "❌ Failed to install changelogithub"
           echo "changelog_created=false" >> "$GITHUB_OUTPUT"
-          exit 1
         fi
       shell: bash
 
