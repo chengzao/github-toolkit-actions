@@ -1,0 +1,20 @@
+name: 'Create Changelog'
+description: 'Creates changelog using changelogithub tool'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for changelog creation'
+    required: true
+  allow-failure:
+    description: 'If false, fail the action on install/generation errors'
+    required: false
+    default: 'true'
+
+outputs:
+  changelog_created:
+    description: 'Whether changelog was created successfully'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

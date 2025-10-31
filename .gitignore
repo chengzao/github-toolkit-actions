@@ -140,3 +140,8 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 .DS_Store
+
+
+# 允许跟踪当前项目的构建产物（JS Action 打包结果）
+!changelog-v3/dist/
+!changelog-v3/dist/**
