@@ -23,14 +23,14 @@ jobs:
 
       - name: Build and Tag
         id: build-tag
-        uses: chengzao/github-toolkit-actions/build-tag@main
+        uses: chengzao/github-toolkit-actions/build-tag@develop
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Changelog
         if: steps.build-tag.outputs.tag_created == 'true'
         id: changelog
-        uses: chengzao/github-toolkit-actions/changelog-v4@main
+        uses: chengzao/github-toolkit-actions/changelog-v4@develop
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           allow-failure: false
