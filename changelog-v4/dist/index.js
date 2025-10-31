@@ -27972,7 +27972,7 @@ var __webpack_exports__ = {};
 (() => {
 "use strict";
 
-
+// forked: https://github.com/antfu/changelogithub/blob/main/src/cli.ts
 const core = __nccwpck_require__(7484);
 const fs = __nccwpck_require__(9896);
 const path = __nccwpck_require__(6928);
