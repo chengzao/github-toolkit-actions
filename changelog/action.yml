@@ -43,9 +43,8 @@ runs:
     
     - name: Install changelogithub
       run: |
-        CHANGELOG_VERSION="latest"
-        echo "📦 Installing changelogithub version ${CHANGELOG_VERSION}..."
-        if ! npm install -g changelogithub@${CHANGELOG_VERSION}; then
+        echo "📦 Installing changelogithub version..."
+        if ! npm install -g changelogithub; then
           echo "❌ Failed to install changelogithub"
           echo "changelog_created=false" >> "$GITHUB_OUTPUT"
           exit 1
