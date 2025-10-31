@@ -31,7 +31,7 @@ jobs:
       - name: Create Changelog
         if: steps.build-tag.outputs.tag_created == 'true'
         id: changelog
-        uses: chengzao/github-toolkit-actions/changelog-v3@main
+        uses: chengzao/github-toolkit-actions/changelog-v4@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
