@@ -1,0 +1,14 @@
+{
+  "name": "changelog",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "generate": "changelogithub"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "changelogithub": "^13.16.1"
+  }
+}

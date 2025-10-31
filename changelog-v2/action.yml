@@ -1,0 +1,74 @@
+name: 'Create Changelog'
+description: 'Creates changelog using changelogithub tool'
+author: 'chengzao'
+
+inputs:
+  token:
+    description: 'GitHub token for changelog creation'
+    required: true
+  node-version:
+    description: 'Node.js version to use with setup-node'
+    required: false
+    default: '18'
+  allow-failure:
+    description: 'If false, fail the action on install/generation errors'
+    required: false
+    default: 'true'
+
+outputs:
+  changelog_created:
+    description: 'Whether changelog was created successfully'
+    value: ${{ steps.changelog.outputs.changelog_created }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'npm'
+        cache-dependency-path: ${{ github.action_path }}/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        set -u
+        echo "📦 Installing project dependencies..."
+        echo "📂 Working directory: $PWD"
+        if ! npm ci; then
+          echo "❌ Failed to install dependencies"
+          if [ "${{ inputs.allow-failure }}" = "false" ]; then
+            echo "❌ Exiting because allow-failure is set to false"
+            exit 1
+          fi
+          echo "ℹ️ Continuing despite install failure because allow-failure is true"
+        else
+          echo "✅ Dependencies installed"
+          echo "🔎 Installed changelogithub version:"
+          npm ls changelogithub --depth=0 || true
+        fi
+      shell: bash
+      working-directory: ${{ github.action_path }}
+
+    - name: Create Changelog
+      id: changelog
+      run: |
+        set -u
+        echo "🚀 Running changelog generation script..."
+        echo "📂 Working directory: $PWD"
+        if npm run generate; then
+          echo "✅ Changelog created successfully"
+          echo "changelog_created=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "⚠️ Failed to create changelog"
+          echo "changelog_created=false" >> "$GITHUB_OUTPUT"
+          if [ "${{ inputs.allow-failure }}" = "false" ]; then
+            echo "❌ Exiting because allow-failure is set to false"
+            exit 1
+          fi
+          echo "ℹ️ Continuing despite failure because allow-failure is true"
+        fi
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
