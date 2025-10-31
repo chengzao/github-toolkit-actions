@@ -25715,6 +25715,14 @@ module.exports = require("fs");
 
 /***/ }),
 
+/***/ 1943:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("fs/promises");
+
+/***/ }),
+
 /***/ 8611:
 /***/ ((module) => {
 
@@ -25739,11 +25747,59 @@ module.exports = require("https");
 
 /***/ }),
 
+/***/ 3339:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("module");
+
+/***/ }),
+
 /***/ 9278:
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 4589:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:assert");
+
+/***/ }),
+
+/***/ 6698:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:async_hooks");
+
+/***/ }),
+
+/***/ 4573:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:buffer");
+
+/***/ }),
+
+/***/ 1421:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:child_process");
+
+/***/ }),
+
+/***/ 7540:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:console");
 
 /***/ }),
 
@@ -25755,11 +25811,123 @@ module.exports = require("node:crypto");
 
 /***/ }),
 
+/***/ 3053:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:diagnostics_channel");
+
+/***/ }),
+
+/***/ 610:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:dns");
+
+/***/ }),
+
 /***/ 8474:
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("node:events");
+
+/***/ }),
+
+/***/ 3024:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs");
+
+/***/ }),
+
+/***/ 1455:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 7067:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:http");
+
+/***/ }),
+
+/***/ 2467:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:http2");
+
+/***/ }),
+
+/***/ 4708:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:https");
+
+/***/ }),
+
+/***/ 8995:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:module");
+
+/***/ }),
+
+/***/ 7030:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:net");
+
+/***/ }),
+
+/***/ 8161:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:os");
+
+/***/ }),
+
+/***/ 6760:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:path");
+
+/***/ }),
+
+/***/ 643:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:perf_hooks");
+
+/***/ }),
+
+/***/ 1708:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:process");
+
+/***/ }),
+
+/***/ 1792:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:querystring");
 
 /***/ }),
 
@@ -25771,11 +25939,107 @@ module.exports = require("node:stream");
 
 /***/ }),
 
+/***/ 6466:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:stream/promises");
+
+/***/ }),
+
+/***/ 7830:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:stream/web");
+
+/***/ }),
+
+/***/ 6193:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:string_decoder");
+
+/***/ }),
+
+/***/ 8500:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:timers/promises");
+
+/***/ }),
+
+/***/ 1692:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:tls");
+
+/***/ }),
+
+/***/ 7066:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:tty");
+
+/***/ }),
+
+/***/ 3136:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:url");
+
+/***/ }),
+
 /***/ 7975:
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("node:util");
+
+/***/ }),
+
+/***/ 3429:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:util/types");
+
+/***/ }),
+
+/***/ 8877:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:v8");
+
+/***/ }),
+
+/***/ 714:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:vm");
+
+/***/ }),
+
+/***/ 5919:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:worker_threads");
+
+/***/ }),
+
+/***/ 8522:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:zlib");
 
 /***/ }),
 
@@ -25803,11 +26067,27 @@ module.exports = require("perf_hooks");
 
 /***/ }),
 
+/***/ 932:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
+
+/***/ }),
+
 /***/ 3480:
 /***/ ((module) => {
 
 "use strict";
 module.exports = require("querystring");
+
+/***/ }),
+
+/***/ 3785:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("readline");
 
 /***/ }),
 
@@ -25848,6 +26128,14 @@ module.exports = require("timers");
 
 "use strict";
 module.exports = require("tls");
+
+/***/ }),
+
+/***/ 2018:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("tty");
 
 /***/ }),
 
@@ -27548,10 +27836,135 @@ module.exports = parseParams
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__nccwpck_require__.m = __webpack_modules__;
+/******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/create fake namespace object */
+/******/ 	(() => {
+/******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
+/******/ 		var leafPrototypes;
+/******/ 		// create a fake namespace object
+/******/ 		// mode & 1: value is a module id, require it
+/******/ 		// mode & 2: merge all properties of value into the ns
+/******/ 		// mode & 4: return value when already ns object
+/******/ 		// mode & 16: return value when it's Promise-like
+/******/ 		// mode & 8|1: behave like require
+/******/ 		__nccwpck_require__.t = function(value, mode) {
+/******/ 			if(mode & 1) value = this(value);
+/******/ 			if(mode & 8) return value;
+/******/ 			if(typeof value === 'object' && value) {
+/******/ 				if((mode & 4) && value.__esModule) return value;
+/******/ 				if((mode & 16) && typeof value.then === 'function') return value;
+/******/ 			}
+/******/ 			var ns = Object.create(null);
+/******/ 			__nccwpck_require__.r(ns);
+/******/ 			var def = {};
+/******/ 			leafPrototypes = leafPrototypes || [null, getProto({}), getProto([]), getProto(getProto)];
+/******/ 			for(var current = mode & 2 && value; typeof current == 'object' && !~leafPrototypes.indexOf(current); current = getProto(current)) {
+/******/ 				Object.getOwnPropertyNames(current).forEach((key) => (def[key] = () => (value[key])));
+/******/ 			}
+/******/ 			def['default'] = () => (value);
+/******/ 			__nccwpck_require__.d(ns, def);
+/******/ 			return ns;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__nccwpck_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__nccwpck_require__.f).reduce((promises, key) => {
+/******/ 				__nccwpck_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks
+/******/ 		__nccwpck_require__.u = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".index.js";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/******/ 	/* webpack/runtime/require chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded chunks
+/******/ 		// "1" means "loaded", otherwise not loaded yet
+/******/ 		var installedChunks = {
+/******/ 			792: 1
+/******/ 		};
+/******/ 		
+/******/ 		// no on chunks loaded
+/******/ 		
+/******/ 		var installChunk = (chunk) => {
+/******/ 			var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;
+/******/ 			for(var moduleId in moreModules) {
+/******/ 				if(__nccwpck_require__.o(moreModules, moduleId)) {
+/******/ 					__nccwpck_require__.m[moduleId] = moreModules[moduleId];
+/******/ 				}
+/******/ 			}
+/******/ 			if(runtime) runtime(__nccwpck_require__);
+/******/ 			for(var i = 0; i < chunkIds.length; i++)
+/******/ 				installedChunks[chunkIds[i]] = 1;
+/******/ 		
+/******/ 		};
+/******/ 		
+/******/ 		// require() chunk loading for javascript
+/******/ 		__nccwpck_require__.f.require = (chunkId, promises) => {
+/******/ 			// "1" is the signal for "already loaded"
+/******/ 			if(!installedChunks[chunkId]) {
+/******/ 				if(true) { // all chunks have JS
+/******/ 					installChunk(require("./" + __nccwpck_require__.u(chunkId)));
+/******/ 				} else installedChunks[chunkId] = 1;
+/******/ 			}
+/******/ 		};
+/******/ 		
+/******/ 		// no external install chunk
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 	})();
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
@@ -27566,6 +27979,54 @@ const path = __nccwpck_require__(6928);
 
 function log(message) {
   core.info(message);
+}
+
+async function runWithProgrammaticAPI() {
+  // changelogithub is ESM; use dynamic import so ncc can include it
+  const mod = await __nccwpck_require__.e(/* import() */ 23).then(__nccwpck_require__.bind(__nccwpck_require__, 1404));
+  const {
+    generate,
+    hasTagOnGitHub,
+    isRepoShallow,
+    sendRelease,
+    uploadAssets
+  } = mod;
+
+  if (typeof generate !== 'function') {
+    throw new Error('changelogithub.generate is not available; unexpected package shape');
+  }
+
+  // Follow CLI behavior: pass token via args, other options由工具内部解析（git、env、配置文件）
+  const { config, md, commits } = await generate({ token: process.env.GITHUB_TOKEN });
+
+  if (!config.token) {
+    throw new Error('No GitHub token found, specify it via GITHUB_TOKEN env.');
+  }
+
+  if (typeof hasTagOnGitHub === 'function') {
+    const ok = await hasTagOnGitHub(config.to, config);
+    if (!ok) {
+      throw new Error(`Current ref "${String(config.to)}" is not available as tags on GitHub.`);
+    }
+  }
+
+  if (typeof isRepoShallow === 'function') {
+    const shallow = await isRepoShallow();
+    if (!commits.length && shallow) {
+      throw new Error('The repo seems to be clone shallowly. You might want to specify fetch-depth: 0 in your CI config.');
+    }
+  }
+
+  // 发送 Release（与 CLI 保持一致的核心行为）
+  if (typeof sendRelease !== 'function') {
+    throw new Error('changelogithub.sendRelease is not available; unexpected package shape');
+  }
+  const release = await sendRelease(config, md);
+
+  // assets 可选（Action 未暴露该输入，若有内部配置则尝试上传）
+  if (config.assets && Array.isArray(config.assets) && config.assets.length > 0 && typeof uploadAssets === 'function') {
+    await uploadAssets(config, config.assets, release);
+  }
 }
 
 async function main() {
@@ -27596,20 +28057,23 @@ async function main() {
     // ignore chdir errors, will run in current working directory
   }
 
-  log('🚀 Running changelogithub (bundled) in repository workspace...');
+  log('🚀 Running changelogithub (bundled, programmatic API) in repository workspace...');
   log(`📂 Working directory: ${process.cwd()}`);
+  log(`🔐 Token provided: ${process.env.GITHUB_TOKEN ? 'yes' : 'no'}`);
+  log(`📌 Repo context: GITHUB_REPOSITORY=${process.env.GITHUB_REPOSITORY || ''}, GITHUB_REF=${process.env.GITHUB_REF || ''}`);
 
   try {
-    // Static import specifier for ncc to include ESM CLI into the bundle
-    await Promise.resolve().then(function webpackMissingModule() { var e = new Error("Cannot find module 'changelogithub/cli.mjs'"); e.code = 'MODULE_NOT_FOUND'; throw e; });
+    await runWithProgrammaticAPI();
 
     core.setOutput('changelog_created', 'true');
     log('✅ Changelog created successfully');
   } catch (err) {
     core.setOutput('changelog_created', 'false');
-    core.warning('⚠️ Failed to create changelog');
+    const msg = err && err.message ? err.message : String(err);
+    core.warning(`⚠️ Failed to create changelog: ${msg}`);
+    if (err && err.stack) core.info(err.stack);
     if (!allowFailure) {
-      core.setFailed(`❌ Exiting because allow-failure is set to false: ${err && err.message ? err.message : String(err)}`);
+      core.setFailed(`❌ Exiting because allow-failure is set to false: ${msg}`);
       return;
     }
     log('ℹ️ Continuing despite failure because allow-failure is true');
