@@ -1,0 +1,46 @@
+name: Build and Tag for Develop
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - "*.md"
+  workflow_dispatch:  
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Build and Tag
+        id: build-tag
+        uses: chengzao/github-toolkit-actions/build-tag@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Changelog
+        if: steps.build-tag.outputs.tag_created == 'true'
+        id: changelog
+        uses: chengzao/github-toolkit-actions/changelog-v4@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allow-failure: false
+
+      - name: Check changelog creation result
+        run: |
+          echo ""
+          if [ "${{ steps.changelog.outputs.changelog_created }}" = "true" ]; then
+            echo "✅ Changelog was created successfully"
+          else
+            echo "⚠️ Changelog was not created or creation failed"
+          fi
+        shell: bash
