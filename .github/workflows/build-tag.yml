@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and Tag
         id: build-tag
-        uses: ${{ github.workspace }}/build-tag
+        uses: chengzao/github-toolkit-actions/build-tag@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           prefix: 'main'
@@ -29,7 +29,7 @@ jobs:
       - name: Create Changelog
         if: steps.build-tag.outputs.tag_created == 'true'
         id: changelog
-        uses: ${{ github.workspace }}/changelog-v2
+        uses: chengzao/github-toolkit-actions/changelog-v2@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
