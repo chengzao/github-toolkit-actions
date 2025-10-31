@@ -55,6 +55,18 @@ runs:
         echo "🔗 Commit URL: ${{ github.event.head_commit.url || 'N/A' }}"
       shell: bash
 
+    - name: Validate Git environment
+      run: |
+        set -euo pipefail
+        echo ""
+        if ! command -v git &> /dev/null; then
+          echo "❌ git is not installed or not in PATH"
+          exit 1
+        fi
+        echo "🔧 git version: $(git --version)"
+        echo "✅ Git environment validation passed"
+      shell: bash
+
     - name: Create a release tag
       id: create_tag
       run: |

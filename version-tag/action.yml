@@ -42,7 +42,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Validate Node.js environment
+    - name: Validate Node.js and Git environment
       run: |
         set -euo pipefail
         echo ""
@@ -50,8 +50,13 @@ runs:
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
         fi
-        echo "✅ Node.js environment validation passed"
+        if ! command -v git &> /dev/null; then
+          echo "❌ git is not installed or not in PATH"
+          exit 1
+        fi
+        echo "✅ Node.js and git environment validation passed"
         echo "📦 Node.js version: $(node --version)"
+        echo "🔧 git version: $(git --version)"
       shell: bash
 
     - name: Check if version changed

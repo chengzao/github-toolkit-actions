@@ -14,8 +14,9 @@ inputs:
     required: false
     default: 'npm.pkg.github.com'
   scope:
-    description: 'Package scope (e.g., @your-org)'
-    required: true
+    description: 'Package scope (e.g., @your-org). If empty, auto-detect from package.json name (@org/name).'
+    required: false
+    default: ''
   dry_run:
     description: 'Whether to use npm publish --dry-run'
     required: false
@@ -70,20 +71,32 @@ runs:
         echo ""
         NPMRC="$RUNNER_TEMP/npmrc"
 
+        # Determine scope: prefer inputs.scope; if empty, derive from package.json name (@scope/name)
+        SCOPE="${INPUT_SCOPE:-}"
+        if [ -z "$SCOPE" ]; then
+          NAME=$(node -p "require('./package.json').name" 2>/dev/null || echo '')
+          if [[ "$NAME" == @*/* ]]; then
+            SCOPE="${NAME%%/*}"
+          fi
+        fi
+
         # Normalize scope to start with "@"
-        SCOPE="${INPUT_SCOPE}"
-        if [[ "$SCOPE" != @* ]]; then
+        if [ -n "$SCOPE" ] && [[ "$SCOPE" != @* ]]; then
           SCOPE="@$SCOPE"
         fi
 
         {
-          echo "${SCOPE}:registry=https://${INPUT_REGISTRY}"
+          if [ -n "$SCOPE" ]; then
+            echo "${SCOPE}:registry=https://${INPUT_REGISTRY}"
+          fi
+          echo "always-auth=true"
           echo "//${INPUT_REGISTRY}/:_authToken=${GITHUB_TOKEN}"
         } > "$NPMRC"
 
         # Export user config for subsequent steps
         echo "NPM_CONFIG_USERCONFIG=$NPMRC" >> "$GITHUB_ENV"
         echo "📄 Using npm config at: $NPMRC"
+        echo "👤 Scope: ${SCOPE:-<none>}"
 
         # Optional identity check
         if ! npm whoami --registry="https://${INPUT_REGISTRY}" >/dev/null 2>&1; then
@@ -128,7 +141,7 @@ runs:
         echo "package_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
 
         # Check if npm package version already exists
-        if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://$INPUT_REGISTRY" --json >/dev/null 2>&1; then
+        if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://$INPUT_REGISTRY" --json --silent >/dev/null 2>&1; then
           echo "⚠️ Version $PUBLISH_VERSION already exists, skipping publish"
           echo "publish_success=false" >> "$GITHUB_OUTPUT"
           echo "skip_publish=true" >> "$GITHUB_OUTPUT"

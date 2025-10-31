@@ -28,6 +28,20 @@ async function main() {
   const allowFailureInput = core.getInput('allow-failure') || 'true';
   const allowFailure = !(String(allowFailureInput).toLowerCase() === 'false');
 
+  // Validate git environment
+  log('🔎 Validating git environment...');
+  try {
+    await runCmd(process.platform === 'win32' ? 'git.exe' : 'git', ['--version']);
+    log('✅ Git environment validation passed');
+  } catch (err) {
+    core.warning('❌ git is not installed or not in PATH');
+    if (!allowFailure) {
+      core.setFailed('❌ Exiting because allow-failure is set to false');
+      return;
+    }
+    log('ℹ️ Continuing despite missing git because allow-failure is true');
+  }
+
   // Prepare npm cache directory (mirrors composite behavior; no cache action in JS)
   try {
     const homeDir = process.env.HOME || process.env.USERPROFILE || '';

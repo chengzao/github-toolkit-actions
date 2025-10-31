@@ -36,6 +36,18 @@ runs:
       run: mkdir -p ~/.npm
       shell: bash
 
+    - name: Validate Git environment
+      run: |
+        set -euo pipefail
+        echo ""
+        if ! command -v git &> /dev/null; then
+          echo "❌ git is not installed or not in PATH"
+          exit 1
+        fi
+        echo "🔧 git version: $(git --version)"
+        echo "✅ Git environment validation passed"
+      shell: bash
+
     - name: Cache npm registry
       uses: actions/cache@v4
       with:
@@ -46,7 +58,7 @@ runs:
 
     - name: Install dependencies
       run: |
-        set -u
+        set -euo pipefail
         echo "📦 Installing project dependencies..."
         echo "📂 Working directory: $PWD"
         if ! npm ci; then
@@ -67,7 +79,7 @@ runs:
     - name: Create Changelog
       id: changelog
       run: |
-        set -u
+        set -euo pipefail
         echo "🚀 Running changelogithub in repository workspace..."
         echo "📂 Working directory: $PWD"
         echo "🧰 Using changelogithub from: ${{ github.action_path }}/node_modules/.bin/changelogithub"
