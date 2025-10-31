@@ -1,5 +1,5 @@
 'use strict';
-
+// forked: https://github.com/antfu/changelogithub/blob/main/src/cli.ts
 const core = require('@actions/core');
 const fs = require('fs');
 const path = require('path');
