@@ -29,7 +29,7 @@ jobs:
           node-version: 18
 
       - name: Create Changelog
-        uses: chengzao/github-toolkit-actions/changelog@main
+        uses: chengzao/github-toolkit-actions/changelog-v3@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -53,7 +53,7 @@ jobs:
 ```yaml
 - name: Create Changelog
   id: changelog
-  uses: chengzao/github-toolkit-actions/changelog@main
+  uses: chengzao/github-toolkit-actions/changelog-v3@main
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
 
