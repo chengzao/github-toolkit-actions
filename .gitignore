@@ -145,3 +145,5 @@ vite.config.ts.timestamp-*
 # 允许跟踪当前项目的构建产物（JS Action 打包结果）
 !changelog-v3/dist/
 !changelog-v3/dist/**
+!changelog-v4/dist/
+!changelog-v4/dist/**
