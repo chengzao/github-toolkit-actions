@@ -89,7 +89,7 @@ runs:
         echo "🏷️ Version: $PUBLISH_VERSION"
         echo "🌐 Registry: https://$INPUT_REGISTRY"
 
-        # 设置基本输出参数
+        # set basic output parameters
         echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
         echo "package_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
         

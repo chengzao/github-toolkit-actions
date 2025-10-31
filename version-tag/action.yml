@@ -81,7 +81,7 @@ runs:
         echo "🏷️ Creating tag: $TAG_NAME"
         git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
 
-        # 设置标签名称输出
+        # set tag name output parameters
         echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
         echo "📤 Pushing tag to origin..."
@@ -91,7 +91,7 @@ runs:
         else
           echo "❌ Failed to push tag $TAG_NAME"
           echo "tag_created=false" >> "$GITHUB_OUTPUT"
-          echo "tag_name=" >> "$GITHUB_OUTPUT"  # 清除标签名称，因为创建失败
+          echo "tag_name=" >> "$GITHUB_OUTPUT"  # clear tag name because creation failed
           exit 1
         fi
       shell: bash
