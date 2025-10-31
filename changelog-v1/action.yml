@@ -1,12 +1,26 @@
 name: 'Create Changelog'
 description: 'Creates changelog using changelogithub tool'
 author: 'chengzao'
+branding:
+  icon: 'book'
+  color: 'blue'
 
 inputs:
   token:
     description: 'GitHub token for changelog creation'
     required: true
-
+  fail_on_error:
+    description: 'Whether to fail the workflow when changelog creation fails'
+    required: false
+    default: 'false'
+  changelogithub_version:
+    description: 'Version spec for changelogithub (e.g., 0.12.7 or latest)'
+    required: false
+    default: 'latest'
+  args:
+    description: 'Additional CLI arguments to pass to changelogithub'
+    required: false
+    default: ''
 outputs:
   changelog_created:
     description: 'Whether changelog was created successfully'
@@ -33,34 +47,40 @@ runs:
         echo "📦 npm version: $(npm --version)"
       shell: bash
 
-    - name: Cache changelogithub
-      uses: actions/cache@v4
-      with:
-        path: ~/.npm
-        key: ${{ runner.os }}-npm-changelogithub-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-npm-changelogithub-
-    
-    - name: Install changelogithub
-      run: |
-        echo "📦 Installing changelogithub version..."
-        if ! npm install -g changelogithub; then
-          echo "❌ Failed to install changelogithub"
-          echo "changelog_created=false" >> "$GITHUB_OUTPUT"
-        fi
-      shell: bash
-
     - name: Create Changelog
       id: changelog
       run: |
+        set -euo pipefail
+        echo ""
         echo "🚀 Running changelogithub..."
-        if changelogithub; then
+        VERSION_SPEC="${INPUT_CHANGELOGITHUB_VERSION:-latest}"
+        EXTRA_ARGS="${INPUT_ARGS:-}"
+        echo "🔖 changelogithub version: ${VERSION_SPEC}"
+        echo "⚙️ additional args: ${EXTRA_ARGS}"
+
+        # Build args array safely to preserve quoting and spaces
+        ARGS=()
+        if [ -n "${EXTRA_ARGS}" ]; then
+          # split EXTRA_ARGS by IFS into array (quotes in args may not be preserved)
+          read -r -a ARGS <<< "${EXTRA_ARGS}"
+        fi
+
+        # Execute changelogithub via npx with version spec
+        if npx "changelogithub@${VERSION_SPEC}" "${ARGS[@]}"; then
           echo "✅ Changelog created successfully"
           echo "changelog_created=true" >> "$GITHUB_OUTPUT"
         else
-          echo "⚠️ Failed to create changelog, but continuing..."
+          echo "❌ Failed to create changelog"
           echo "changelog_created=false" >> "$GITHUB_OUTPUT"
+          if [ "${INPUT_FAIL_ON_ERROR:-false}" = "true" ]; then
+            echo "⛔ Failing workflow due to fail_on_error=true"
+            exit 1
+          fi
+          echo "ℹ️ Continuing workflow (fail_on_error=false)"
         fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        INPUT_CHANGELOGITHUB_VERSION: ${{ inputs.changelogithub_version }}
+        INPUT_ARGS: ${{ inputs.args }}
+        INPUT_FAIL_ON_ERROR: ${{ inputs.fail_on_error }}

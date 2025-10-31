@@ -1,6 +1,9 @@
 name: 'Publish Package to GitHub Packages'
 description: 'Builds and publishes package to GitHub Packages with version checking'
 author: 'chengzao'
+branding:
+  icon: 'package'
+  color: 'purple'
 
 inputs:
   token:
@@ -13,6 +16,18 @@ inputs:
   scope:
     description: 'Package scope (e.g., @your-org)'
     required: true
+  dry_run:
+    description: 'Whether to use npm publish --dry-run'
+    required: false
+    default: 'false'
+  dist_tag:
+    description: 'npm dist-tag to publish under (maps to --tag)'
+    required: false
+    default: ''
+  access:
+    description: 'npm access (public|restricted) when applicable'
+    required: false
+    default: ''
 
 outputs:
   package_name:
@@ -49,78 +64,104 @@ runs:
         echo "📦 npm version: $(npm --version)"
       shell: bash
 
-    - name: Creating .npmrc
+    - name: Configure npm auth
       run: |
+        set -euo pipefail
         echo ""
-        rm -rf .npmrc
-        cat << EOF > "$HOME/.npmrc"
-          ${INPUT_SCOPE}:registry=https://${INPUT_REGISTRY}
-          //${INPUT_REGISTRY}/:_authToken=$GITHUB_TOKEN
-        EOF
+        NPMRC="$RUNNER_TEMP/npmrc"
+
+        # Normalize scope to start with "@"
+        SCOPE="${INPUT_SCOPE}"
+        if [[ "$SCOPE" != @* ]]; then
+          SCOPE="@$SCOPE"
+        fi
+
+        {
+          echo "${SCOPE}:registry=https://${INPUT_REGISTRY}"
+          echo "//${INPUT_REGISTRY}/:_authToken=${GITHUB_TOKEN}"
+        } > "$NPMRC"
+
+        # Export user config for subsequent steps
+        echo "NPM_CONFIG_USERCONFIG=$NPMRC" >> "$GITHUB_ENV"
+        echo "📄 Using npm config at: $NPMRC"
+
+        # Optional identity check
+        if ! npm whoami --registry="https://${INPUT_REGISTRY}" >/dev/null 2>&1; then
+          echo "⚠️ npm whoami failed (will rely on publish step to validate auth)"
+        fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
         INPUT_SCOPE: ${{ inputs.scope }}
         INPUT_REGISTRY: ${{ inputs.registry }}
 
-    - name: Publish to Github Packages
+    - name: Publish to GitHub Packages
       id: publish
       run: |
+        set -euo pipefail
         echo ""
-        # Cleanup function to remove .npmrc
-        cleanup() {
-          rm -f "$HOME/.npmrc" 2>/dev/null || true
-        }
 
-        # Set trap to ensure cleanup runs on script exit
+        # Cleanup function to remove temporary npm config
+        cleanup() {
+          rm -f "${NPM_CONFIG_USERCONFIG:-}" 2>/dev/null || true
+        }
         trap cleanup EXIT
 
-        # Get package version and name from package.json
-        PUBLISH_VERSION=$(node -p "require('./package.json').version" 2>/dev/null)
-        PACKAGE_NAME=$(node -p "require('./package.json').name" 2>/dev/null)
+        # Read package metadata
+        PUBLISH_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || true)
+        PACKAGE_NAME=$(node -p "require('./package.json').name" 2>/dev/null || true)
 
         # Validate package.json exists and has required fields
-        if [ -z "$PUBLISH_VERSION" ] || [ -z "$PACKAGE_NAME" ]; then
+        if [ -z "${PUBLISH_VERSION:-}" ] || [ -z "${PACKAGE_NAME:-}" ]; then
           echo "❌ package.json not found or missing required fields"
+          echo "publish_success=false" >> "$GITHUB_OUTPUT"
+          echo "skip_publish=false" >> "$GITHUB_OUTPUT"
           exit 1
         fi
 
-        echo "📦 Publishing package: $PACKAGE_NAME"
+        echo "📦 Package: $PACKAGE_NAME"
         echo "🏷️ Version: $PUBLISH_VERSION"
         echo "🌐 Registry: https://$INPUT_REGISTRY"
 
-        # set basic output parameters
+        # Set basic output parameters
         echo "package_name=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
         echo "package_version=$PUBLISH_VERSION" >> "$GITHUB_OUTPUT"
-        
+
         # Check if npm package version already exists
         if npm view "$PACKAGE_NAME@$PUBLISH_VERSION" --registry="https://$INPUT_REGISTRY" --json >/dev/null 2>&1; then
           echo "⚠️ Version $PUBLISH_VERSION already exists, skipping publish"
-          echo "📦 Package: $PACKAGE_NAME"
-          echo "🏷️ Version: $PUBLISH_VERSION"
-          echo "🌐 Registry: https://$INPUT_REGISTRY"
           echo "publish_success=false" >> "$GITHUB_OUTPUT"
           echo "skip_publish=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Build publish arguments
+        ARGS=(--registry="https://$INPUT_REGISTRY")
+        if [ "${INPUT_DRY_RUN:-false}" = "true" ]; then
+          ARGS+=(--dry-run)
+        fi
+        if [ -n "${INPUT_DIST_TAG:-}" ]; then
+          ARGS+=(--tag "${INPUT_DIST_TAG}")
+        fi
+        if [ -n "${INPUT_ACCESS:-}" ]; then
+          ARGS+=(--access "${INPUT_ACCESS}")
+        fi
+
+        echo "🚀 Publishing: npm publish ${ARGS[*]}"
+        if npm publish "${ARGS[@]}"; then
+          echo "✅ Successfully published"
+          echo "publish_success=true" >> "$GITHUB_OUTPUT"
+          echo "skip_publish=false" >> "$GITHUB_OUTPUT"
         else
-          echo "🚀 Publishing to registry..."
-          if npm publish --registry="https://$INPUT_REGISTRY"; then
-            echo "✅ Successfully published!"
-            echo "📦 Package: $PACKAGE_NAME"
-            echo "🏷️ Version: $PUBLISH_VERSION"
-            echo "🌐 Registry: https://$INPUT_REGISTRY"
-            echo "publish_success=true" >> "$GITHUB_OUTPUT"
-            echo "skip_publish=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "❌ Publish failed!"
-            echo "📦 Package: $PACKAGE_NAME"
-            echo "🏷️ Version: $PUBLISH_VERSION"
-            echo "🌐 Registry: https://$INPUT_REGISTRY"
-            echo "publish_success=false" >> "$GITHUB_OUTPUT"
-            echo "skip_publish=false" >> "$GITHUB_OUTPUT"
-            exit 1
-          fi
+          echo "❌ Publish failed"
+          echo "publish_success=false" >> "$GITHUB_OUTPUT"
+          echo "skip_publish=false" >> "$GITHUB_OUTPUT"
+          exit 1
         fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
         INPUT_REGISTRY: ${{ inputs.registry }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        INPUT_DIST_TAG: ${{ inputs.dist_tag }}
+        INPUT_ACCESS: ${{ inputs.access }}

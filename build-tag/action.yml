@@ -1,6 +1,9 @@
 name: 'Build and Tag'
 description: 'Creates versioned tags with date prefix for releases'
 author: 'chengzao'
+branding:
+  icon: 'tag'
+  color: 'yellow'
 
 inputs:
   token:
@@ -18,6 +21,14 @@ inputs:
     description: 'Git user email for commits and tags'
     required: false
     default: 'github-actions@github.com'
+  tz:
+    description: 'Timezone for date generation, e.g., UTC, Asia/Shanghai'
+    required: false
+    default: 'UTC'
+  date_format:
+    description: 'strftime format for date, e.g., %Y_%m_%d'
+    required: false
+    default: '%Y_%m_%d'
 
 outputs:
   tag_name:
@@ -29,24 +40,6 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Validate Node.js environment
-      run: |
-        echo ""
-        echo "============== 🏷️ Validate Node.js environment =============="
-        if ! command -v node &> /dev/null; then
-          echo "❌ Node.js is not installed or not in PATH"
-          exit 1
-        fi
-
-        if ! command -v npm &> /dev/null; then
-          echo "❌ npm is not installed or not in PATH"
-          exit 1
-        fi
-
-        echo "✅ Node.js environment validation passed"
-        echo "📦 Node.js version: $(node --version)"
-        echo "📦 npm version: $(npm --version)"
-      shell: bash
 
     - name: Verify trigger Info
       run: |
@@ -65,51 +58,81 @@ runs:
     - name: Create a release tag
       id: create_tag
       run: |
+        set -euo pipefail
         echo ""
         echo "=================== 🏷️ Creating release tag ==================="
         git config --global user.name "$GIT_USER_NAME"
         git config --global user.email "$GIT_USER_EMAIL"
 
-        # Current Time
-        DATE=$(date +"%Y_%m_%d")
-
-        # Branch name
-        CURRENT_BRANCH="$INPUT_PREFIX"
-
-        # Get latest tag
-        LATEST_TAG=$(git tag -l "${CURRENT_BRANCH}_${DATE}_v*" | sort -V | tail -n1)
-        # if current day has no tag, start from v1.
-        if [ -z "$LATEST_TAG" ]; then
-            VERSION=1
-        else
-            # get current latest version
-            VERSION=${LATEST_TAG#*v}
-            # increment the version
-            ((VERSION++))
+        # Optional timezone
+        if [ -n "${INPUT_TZ:-}" ]; then
+          export TZ="$INPUT_TZ"
+          echo "🕒 Using timezone: $TZ"
         fi
 
-        # create new tag name
-        TAG_NAME="${CURRENT_BRANCH}_${DATE}_v${VERSION}"
+        # Current date
+        DATE=$(date +"${INPUT_DATE_FORMAT}")
+
+        # Tag prefix (fallback to current branch name when input is empty)
+        TAG_PREFIX="${INPUT_PREFIX:-$GITHUB_REF_NAME}"
+
+        echo "🔧 Tag prefix: $TAG_PREFIX"
+        echo "📅 Date: $DATE"
+
+        # Ensure we have up-to-date tags from remote
+        git fetch --tags --force || true
+
+        # Get latest tag for today
+        LATEST_TAG=$(git tag -l "${TAG_PREFIX}_${DATE}_v*" | sort -V | tail -n1)
+        if [ -z "$LATEST_TAG" ]; then
+          VERSION=1
+        else
+          VERSION="${LATEST_TAG##*_v}"
+          VERSION=$((VERSION + 1))
+        fi
+
+        TAG_NAME="${TAG_PREFIX}_${DATE}_v${VERSION}"
+        echo "🏷️ Candidate tag: $TAG_NAME"
+
+        # Idempotency: skip if tag already exists locally or remotely
+        if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null 2>&1 || \
+           git ls-remote --exit-code --tags origin "refs/tags/$TAG_NAME" >/dev/null 2>&1; then
+          echo "⚠️ Tag $TAG_NAME already exists, skipping creation"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
 
         echo "🏷️ Creating tag: $TAG_NAME"
         git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
 
         echo "📤 Pushing tag to origin..."
-        # set default value
         echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-        
-        if git push origin $TAG_NAME; then
+
+        if git push origin "$TAG_NAME"; then
           echo "✅ Tag $TAG_NAME pushed successfully"
           echo "tag_created=true" >> "$GITHUB_OUTPUT"
         else
+          echo "⚠️ Initial push failed, attempting to re-auth remote and retry..."
+          if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            if git push origin "$TAG_NAME"; then
+              echo "✅ Tag $TAG_NAME pushed successfully after re-auth"
+              echo "tag_created=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
           echo "❌ Failed to push tag $TAG_NAME"
           echo "tag_created=false" >> "$GITHUB_OUTPUT"
-          echo "tag_name=" >> "$GITHUB_OUTPUT"  # clear tag name because creation failed
+          echo "tag_name=" >> "$GITHUB_OUTPUT"
           exit 1
         fi
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
         INPUT_PREFIX: ${{ inputs.prefix }}
+        INPUT_TZ: ${{ inputs.tz }}
+        INPUT_DATE_FORMAT: ${{ inputs.date_format }}
         GIT_USER_NAME: ${{ inputs.git_user_name }}
         GIT_USER_EMAIL: ${{ inputs.git_user_email }}

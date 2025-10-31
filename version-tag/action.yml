@@ -1,7 +1,9 @@
 name: 'Auto Tag'
 description: 'Automatically creates Git tags on version changes'
 author: 'chengzao'
-
+branding:
+  icon: 'tag'
+  color: 'green'
 inputs:
   token:
     description: 'GitHub token for creating tags'
@@ -14,6 +16,14 @@ inputs:
     description: 'Git user email for commits and tags'
     required: false
     default: 'github-actions@github.com'
+  tag_prefix:
+    description: 'Tag prefix, default "v" (final tag = prefix + version)'
+    required: false
+    default: 'v'
+  sign:
+    description: 'Use GPG signed tags (-s). Requires GPG configured on runner.'
+    required: false
+    default: 'false'
 
 outputs:
   version:
@@ -34,54 +44,94 @@ runs:
   steps:
     - name: Validate Node.js environment
       run: |
+        set -euo pipefail
         echo ""
         if ! command -v node &> /dev/null; then
           echo "❌ Node.js is not installed or not in PATH"
           exit 1
         fi
-
-        if ! command -v npm &> /dev/null; then
-          echo "❌ npm is not installed or not in PATH"
-          exit 1
-        fi
-
         echo "✅ Node.js environment validation passed"
         echo "📦 Node.js version: $(node --version)"
-        echo "📦 npm version: $(npm --version)"
       shell: bash
 
     - name: Check if version changed
       id: version_check
       run: |
+        set -euo pipefail
         echo ""
-        VERSION=$(node -p "require('./package.json').version")
+
+        # Read version from package.json with basic validation
+        VERSION=$(node -p "require('./package.json').version" 2>/dev/null || true)
+        if [ -z "${VERSION:-}" ]; then
+          echo "❌ Cannot read version from package.json"
+          exit 1
+        fi
         echo "Current version: $VERSION"
 
-        if git tag --list "v$VERSION" | grep -q "^v$VERSION$"; then
-          echo "⚠️ Tag v$VERSION already exists"
+        # Ensure remote tags are up to date
+        git fetch --tags --force || true
+
+        # Determine tag prefix
+        TAG_PREFIX="${INPUT_TAG_PREFIX:-v}"
+        CANDIDATE_TAG="${TAG_PREFIX}${VERSION}"
+
+        # Prefer remote existence check to avoid local cache issues
+        if git ls-remote --exit-code --tags origin "refs/tags/${CANDIDATE_TAG}" >/dev/null 2>&1; then
+          echo "⚠️ Tag ${CANDIDATE_TAG} already exists (remote)"
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        elif git tag --list "${CANDIDATE_TAG}" | grep -q "^${CANDIDATE_TAG}$"; then
+          echo "⚠️ Tag ${CANDIDATE_TAG} already exists (local)"
           echo "exists=true" >> "$GITHUB_OUTPUT"
         else
-          echo "⚠️ Tag v$VERSION does not exist"
+          echo "ℹ️ Tag ${CANDIDATE_TAG} does not exist"
           echo "exists=false" >> "$GITHUB_OUTPUT"
         fi
+
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       shell: bash
+      env:
+        INPUT_TAG_PREFIX: ${{ inputs.tag_prefix }}
 
     - name: Create Git tag
       id: create_tag
       if: steps.version_check.outputs.exists == 'false'
       run: |
+        set -euo pipefail
         echo ""
+
         git config --global user.name "$GIT_USER_NAME"
         git config --global user.email "$GIT_USER_EMAIL"
 
         VERSION="$STEP_VERSION"
-        TAG_NAME="v$VERSION"
+        TAG_PREFIX="${INPUT_TAG_PREFIX:-v}"
+        TAG_NAME="${TAG_PREFIX}${VERSION}"
+        echo "🏷️ Candidate tag: $TAG_NAME"
+
+        # Double-check idempotency before create (handle race conditions)
+        git fetch --tags --force || true
+        if git rev-parse -q --verify "refs/tags/$TAG_NAME" >/dev/null 2>&1 || \
+           git ls-remote --exit-code --tags origin "refs/tags/$TAG_NAME" >/dev/null 2>&1; then
+          echo "⚠️ Tag $TAG_NAME already exists, skipping"
+          echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Choose annotate or sign
+        SIGN_FLAG="-a"
+        if [ "${INPUT_SIGN:-false}" = "true" ]; then
+          SIGN_FLAG="-s"
+        fi
 
         echo "🏷️ Creating tag: $TAG_NAME"
-        git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+        if ! git tag $SIGN_FLAG "$TAG_NAME" -m "Release $TAG_NAME"; then
+          echo "❌ Failed to create tag $TAG_NAME"
+          echo "tag_created=false" >> "$GITHUB_OUTPUT"
+          echo "tag_name=" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
 
-        # set tag name output parameters
+        # set tag name output parameter
         echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
 
         echo "📤 Pushing tag to origin..."
@@ -89,9 +139,18 @@ runs:
           echo "✅ Successfully created and pushed tag $TAG_NAME"
           echo "tag_created=true" >> "$GITHUB_OUTPUT"
         else
+          echo "⚠️ Initial push failed, attempting to re-auth remote and retry..."
+          if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+            git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            if git push origin "$TAG_NAME"; then
+              echo "✅ Tag $TAG_NAME pushed successfully after re-auth"
+              echo "tag_created=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
           echo "❌ Failed to push tag $TAG_NAME"
           echo "tag_created=false" >> "$GITHUB_OUTPUT"
-          echo "tag_name=" >> "$GITHUB_OUTPUT"  # clear tag name because creation failed
+          echo "tag_name=" >> "$GITHUB_OUTPUT"
           exit 1
         fi
       shell: bash
@@ -99,3 +158,7 @@ runs:
         GIT_USER_NAME: ${{ inputs.git_user_name }}
         GIT_USER_EMAIL: ${{ inputs.git_user_email }}
         STEP_VERSION: ${{ steps.version_check.outputs.version }}
+        INPUT_TAG_PREFIX: ${{ inputs.tag_prefix }}
+        INPUT_SIGN: ${{ inputs.sign }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
