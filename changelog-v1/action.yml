@@ -1,0 +1,93 @@
+name: 'Create Changelog'
+description: 'Creates changelog using changelogithub tool'
+author: 'chengzao'
+branding:
+  icon: 'book'
+  color: 'blue'
+
+inputs:
+  token:
+    description: 'GitHub token for changelog creation'
+    required: true
+  fail_on_error:
+    description: 'Whether to fail the workflow when changelog creation fails'
+    required: false
+    default: 'false'
+  changelogithub_version:
+    description: 'Version spec for changelogithub (e.g., 0.12.7 or latest)'
+    required: false
+    default: 'latest'
+  args:
+    description: 'Additional CLI arguments to pass to changelogithub'
+    required: false
+    default: ''
+outputs:
+  changelog_created:
+    description: 'Whether changelog was created successfully'
+    value: ${{ steps.changelog.outputs.changelog_created }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate Node.js, npm and Git environment
+      run: |
+        set -euo pipefail
+        echo ""
+        if ! command -v node &> /dev/null; then
+          echo "❌ Node.js is not installed or not in PATH"
+          exit 1
+        fi
+
+        if ! command -v npm &> /dev/null; then
+          echo "❌ npm is not installed or not in PATH"
+          exit 1
+        fi
+
+        if ! command -v git &> /dev/null; then
+          echo "❌ git is not installed or not in PATH"
+          exit 1
+        fi
+
+        echo "✅ Node.js, npm and git environment validation passed"
+        echo "📦 Node.js version: $(node --version)"
+        echo "📦 npm version: $(npm --version)"
+        echo "🔧 git version: $(git --version)"
+      shell: bash
+
+    - name: Create Changelog
+      id: changelog
+      run: |
+        set -euo pipefail
+        echo ""
+        echo "🚀 Running changelogithub..."
+        VERSION_SPEC="${INPUT_CHANGELOGITHUB_VERSION:-latest}"
+        EXTRA_ARGS="${INPUT_ARGS:-}"
+        echo "🔖 changelogithub version: ${VERSION_SPEC}"
+        echo "⚙️ additional args: ${EXTRA_ARGS}"
+
+        # Build args array safely to preserve quoting and spaces
+        ARGS=()
+        if [ -n "${EXTRA_ARGS}" ]; then
+          # split EXTRA_ARGS by IFS into array (quotes in args may not be preserved)
+          read -r -a ARGS <<< "${EXTRA_ARGS}"
+        fi
+
+        # Execute changelogithub via npx with version spec
+        if npx "changelogithub@${VERSION_SPEC}" "${ARGS[@]}"; then
+          echo "✅ Changelog created successfully"
+          echo "changelog_created=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "❌ Failed to create changelog"
+          echo "changelog_created=false" >> "$GITHUB_OUTPUT"
+          if [ "${INPUT_FAIL_ON_ERROR:-false}" = "true" ]; then
+            echo "⛔ Failing workflow due to fail_on_error=true"
+            exit 1
+          fi
+          echo "ℹ️ Continuing workflow (fail_on_error=false)"
+        fi
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        INPUT_CHANGELOGITHUB_VERSION: ${{ inputs.changelogithub_version }}
+        INPUT_ARGS: ${{ inputs.args }}
+        INPUT_FAIL_ON_ERROR: ${{ inputs.fail_on_error }}

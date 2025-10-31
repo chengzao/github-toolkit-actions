@@ -3,6 +3,7 @@
 const core = require('@actions/core');
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 function log(message) {
   core.info(message);
@@ -60,6 +61,22 @@ async function main() {
   const token = core.getInput('token', { required: true });
   const allowFailureInput = core.getInput('allow-failure') || 'true';
   const allowFailure = !(String(allowFailureInput).toLowerCase() === 'false');
+
+  // Validate git environment
+  log('🔎 Validating git environment...');
+  try {
+    const gitCmd = process.platform === 'win32' ? 'git.exe' : 'git';
+    const res = spawnSync(gitCmd, ['--version'], { stdio: 'ignore' });
+    if (res.status !== 0) throw new Error('git not available');
+    log('✅ Git environment validation passed');
+  } catch (_) {
+    core.warning('❌ git is not installed or not in PATH');
+    if (!allowFailure) {
+      core.setFailed('❌ Exiting because allow-failure is set to false');
+      return;
+    }
+    log('ℹ️ Continuing despite missing git because allow-failure is true');
+  }
 
   // Prepare npm cache directory (mirrors composite behavior; no cache action in JS)
   try {

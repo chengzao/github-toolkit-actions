@@ -1,11 +1,16 @@
 # Publish Package to GitHub Packages Action
 
-一个用于发布包到 GitHub Packages 的 GitHub Action，包含版本检查功能。
+一个用于发布包到 GitHub Packages 的 GitHub Action，已改进认证安全性、版本存在性检查与可配置发布选项。
 
 ## 功能特性
 
-- 🔧 需要 Node.js 和 npm 环境
-- 📦 发布到 GitHub Packages
+- 🔧 需要 Node.js 和 npm 环境（步骤内会校验）
+- 🔒 使用临时 NPM 配置（$RUNNER_TEMP/npmrc），通过 NPM_CONFIG_USERCONFIG 指定，步骤结束自动清理
+- 🧪 支持 dry run（--dry-run）
+- 🏷️ 支持 dist-tag（--tag）
+- 🔐 支持 access（--access），用于 npmjs 等需要时
+- 🧭 作用域 scope 自动规范化（自动补全前缀 @）
+- 🔁 在发布前检查版本是否已存在，存在则跳过并输出 skip_publish
 
 ## 使用方法
 
@@ -28,12 +33,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
         with:
-           fetch-depth: 0
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'yarn'
+          node-version: 18
 
       - name: Install Dependencies
         run: yarn install
@@ -47,6 +52,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           registry: 'npm.pkg.github.com'
           scope: '@your-org'
+          dry_run: 'false'          # 可选：是否 dry-run
+          dist_tag: ''              # 可选：发布的 dist-tag（如：next、beta）
+          access: ''                # 可选：npm access（public|restricted），GPR 通常无需
 ```
 
 ## 输入参数
@@ -54,8 +62,11 @@ jobs:
 | 参数 | 描述 | 是否必需 | 默认值 |
 |------|------|----------|--------|
 | `token` | GitHub token，用于发布到 GitHub Packages | 是 | - |
-| `registry` | 包注册表 URL | 否 | `'npm.pkg.github.com'` |
-| `scope` | 包作用域（例如：@your-org） | 是 | - |
+| `registry` | 包注册表域名（不含协议） | 否 | `'npm.pkg.github.com'` |
+| `scope` | 包作用域（例如：@your-org），会自动规范化为以 `@` 开头 | 是 | - |
+| `dry_run` | 是否以 dry-run 模式发布 | 否 | `'false'` |
+| `dist_tag` | 指定 dist-tag（映射到 `npm publish --tag`） | 否 | `''` |
+| `access` | 指定 access（映射到 `npm publish --access`） | 否 | `''` |
 
 ## 输出参数
 
@@ -68,8 +79,6 @@ jobs:
 
 ## 使用输出参数
 
-你可以在后续步骤中使用这些输出参数来执行条件操作：
-
 ```yaml
 - name: Publish package
   id: publish_pkg
@@ -78,6 +87,8 @@ jobs:
     token: ${{ secrets.GITHUB_TOKEN }}
     registry: 'npm.pkg.github.com'
     scope: '@your-org'
+    dist_tag: 'next'
+    dry_run: 'false'
 
 - name: Check publish result
   run: |
@@ -93,45 +104,22 @@ jobs:
     fi
 ```
 
-## 输出参数详细说明
-
-- `package_name`: 字符串，从 package.json 读取的包名称
-- `package_version`: 字符串，从 package.json 读取的版本号
-- `publish_success`: 布尔值，表示发布操作是否成功
-  - 当发布成功时，值为 `true`
-  - 当发布失败或因版本存在跳过时，值为 `false`
-- `skip_publish`: 布尔值，表示是否因版本已存在而跳过发布
-  - 当版本已存在且跳过发布时，值为 `true`
-  - 当正常发布流程时，值为 `false`
-
 ## 工作流程
 
-1. **检出代码** - 获取仓库的完整历史
-2. **设置 Node.js** - 配置指定版本的 Node.js 环境
-3. **环境校验** - 验证 Node.js 和 npm 环境是否可用
-4. **配置认证** - 创建 .npmrc 文件进行 GitHub Packages 认证
-5. **版本检查** - 检查包版本是否已存在
-6. **发布包** - 如果版本不存在，则发布到 GitHub Packages
-7. **清理** - 自动删除认证文件
+1. 检出代码 - 获取仓库完整历史
+2. 设置 Node.js - 配置指定版本 Node.js 环境
+3. 环境校验 - 验证 Node.js 和 npm 环境是否可用
+4. 配置认证 - 在临时目录生成 npmrc 文件，并通过 NPM_CONFIG_USERCONFIG 注入，仅在本作业中生效
+5. 版本检查 - 查询目标版本是否已存在，存在则跳过
+6. 发布包 - 根据输入选项执行 npm publish（支持 --dry-run、--tag、--access）
+7. 清理 - 自动删除临时 npmrc
 
-**注意**：构建过程需要在调用此 Action 之前完成
+## 环境与认证说明
 
-## 环境要求
-
-- 需要有效的 `package.json` 文件
-- 需要 GitHub Packages 访问权限
-- 需要有效的 GitHub token
-- 需要 Node.js 和 npm 环境（Action 会自动校验）
-- 包需要在调用此 Action 之前构建完成
-
-## 认证配置
-
-Action 会自动创建 `.npmrc` 文件，包含必要的认证信息：
-
-```
-@your-scope:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN
-```
+- 该 Action 会将 npm 配置写入 `$RUNNER_TEMP/npmrc`，并通过 `NPM_CONFIG_USERCONFIG` 环境变量仅对当前 Job 生效，避免污染 `$HOME/.npmrc`
+- 会尝试执行 `npm whoami` 进行基本身份检查，失败不直接终止（发布阶段仍会校验）
+- `scope` 会自动规范化为以 `@` 开头，最终 `.npmrc` 中将写入 `@scope:registry=...` 与对应的 token 行
+- 如需发布到 npmjs.org，需要在 `registry`、`access` 等参数上进行相应调整
 
 ## 本地开发
 
