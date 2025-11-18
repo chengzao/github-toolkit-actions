@@ -1,4 +1,4 @@
-# GitHub Actions 集合
+# GitHub Actions
 
 这是一个从现有 workflow 文件封装而成的 GitHub Actions 集合，包含了常用的 CI/CD 功能。
 
