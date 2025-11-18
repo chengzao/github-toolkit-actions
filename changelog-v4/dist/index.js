@@ -28014,7 +28014,19 @@ async function runWithProgrammaticAPI() {
   if (typeof isRepoShallow === 'function') {
     const shallow = await isRepoShallow();
     if (!commits.length && shallow) {
-      throw new Error('The repo seems to be clone shallowly. You might want to specify fetch-depth: 0 in your CI config.');
+      throw new Error(`
+❌ Error: Shallow repository detected!
+This action requires full git history to generate changelog correctly.
+
+Please configure actions/checkout with fetch-depth: 0 in your workflow:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+For more information, see: https://github.com/actions/checkout#usage
+      `.trim().replace(/^ {4}/gm, ''));
     }
   }
 
