@@ -42,6 +42,36 @@ async function main() {
     log('ℹ️ Continuing despite missing git because allow-failure is true');
   }
 
+  // Check for shallow repository
+  try {
+    log('🔍 Checking repository depth...');
+    const { execSync } = require('child_process');
+    const isShallow = execSync('git rev-parse --is-shallow-repository', { encoding: 'utf8' }).trim();
+    
+    if (isShallow === 'true') {
+      const errorMsg = `
+❌ Error: Shallow repository detected!
+This action requires full git history to generate changelog correctly.
+
+Please configure actions/checkout with fetch-depth: 0 in your workflow:
+
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+For more information, see: https://github.com/actions/checkout#usage
+      `.trim();
+      
+      core.setFailed(errorMsg);
+      return;
+    }
+    
+    log('✅ Full git history available');
+  } catch (err) {
+    core.warning('⚠️ Unable to check repository depth: ' + (err.message || String(err)));
+  }
+
   // Prepare npm cache directory (mirrors composite behavior; no cache action in JS)
   try {
     const homeDir = process.env.HOME || process.env.USERPROFILE || '';

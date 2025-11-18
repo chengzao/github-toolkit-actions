@@ -9,6 +9,32 @@
 - ⚙️ 支持参数透传（args），可灵活控制 from/to/tag/dry-run 等
 - ⛔ 支持 fail_on_error，决定失败时是否终止工作流
 
+## 重要提示
+
+⚠️ **必须在工作流中配置 `fetch-depth: 0`**
+
+此 Action 依赖完整的 Git 提交历史来生成准确的变更日志。如果未正确配置 `fetch-depth: 0`，将会出现以下错误：
+
+```
+Error: Shallow repository detected!
+```
+
+请确保在工作流中配置：
+
+```yaml
+- name: Check out code
+  uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+```
+
+> 💡 **为什么需要 fetch-depth: 0？**
+> 
+> 在 GitHub Actions 中，`actions/checkout` 默认只获取最近一次提交（fetch-depth: 1）。
+> 这会导致 Action 无法访问完整的提交历史，进而无法生成准确的变更日志。
+> 
+> `fetch-depth: 0` 表示获取完整的提交历史，是生成 changelog 的必要条件。
+
 ## 用法
 
 ```yaml
@@ -61,7 +87,7 @@ jobs:
 
 ## 使用输出参数
 
-```yaml
+```
 - name: Create Changelog
   id: changelog
   uses: chengzao/github-toolkit-actions/changelog-v1@main

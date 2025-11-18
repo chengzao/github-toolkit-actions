@@ -48,6 +48,33 @@ runs:
         echo "✅ Git environment validation passed"
       shell: bash
 
+    - name: Check for shallow repository
+      run: |
+        set -euo pipefail
+        echo ""
+        echo "🔍 Checking repository depth..."
+        
+        if git rev-parse --is-shallow-repository >/dev/null 2>&1; then
+          IS_SHALLOW=$(git rev-parse --is-shallow-repository)
+          if [ "$IS_SHALLOW" = "true" ]; then
+            echo "❌ Error: Shallow repository detected!"
+            echo "This action requires full git history to generate changelog correctly."
+            echo ""
+            echo "Please configure actions/checkout with fetch-depth: 0 in your workflow:"
+            echo ""
+            echo "    - name: Check out code"
+            echo "      uses: actions/checkout@v4"
+            echo "      with:"
+            echo "        fetch-depth: 0"
+            echo ""
+            echo "For more information, see: https://github.com/actions/checkout#usage"
+            exit 1
+          fi
+        fi
+        
+        echo "✅ Full git history available"
+      shell: bash
+
     - name: Cache npm registry
       uses: actions/cache@v4
       with:
